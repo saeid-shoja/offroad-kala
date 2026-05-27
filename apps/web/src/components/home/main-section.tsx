@@ -45,7 +45,7 @@ export default function MainSection() {
           </Link>
         </div>
         {shopProducts.length > 0 ? (
-          <div className="grid gap-4 grid-cols-4 lg:grid-cols-6">
+          <div className="grid gap-4 grid-cols-4 lg:grid-cols-6 bg-blue-200 py-20 w-full">
             {shopProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

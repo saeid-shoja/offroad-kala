@@ -13,8 +13,7 @@ export type Slide = {
 export const MOCK_SLIDES: Slide[] = [
   {
     id: '1',
-    imageUrl:
-      'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1920&q=80',
+    imageUrl: '/images/hero/s1.webp',
     title: 'آفرود شاپ | فروشگاه تخصصی لوازم آفرود',
     description: 'خرید و فروش لوازم و تجهیزات آفرود با ضمانت اصالت کالا',
     link: '/products',
@@ -22,8 +21,7 @@ export const MOCK_SLIDES: Slide[] = [
   },
   {
     id: '2',
-    imageUrl:
-      'https://images.unsplash.com/photo-1516738901171-8eb4ec13bd37?w=1920&q=80',
+    imageUrl: '/images/hero/s2.jpg',
     title: 'تجهیزات حرفه‌ای برای مسیرهای سخت',
     description: 'لاستیک، لیفت کیت، بردگارد و قطعات اورجینال',
     link: '/categories',
@@ -31,8 +29,15 @@ export const MOCK_SLIDES: Slide[] = [
   },
   {
     id: '3',
-    imageUrl:
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80',
+    imageUrl: '/images/hero/s3.jpg',
+    title: 'آگهی خود را ثبت کنید',
+    description: 'مانند بازارچه، محصول دست‌دوم خود را بفروشید',
+    link: '/products/new',
+    linkLabel: 'ثبت آگهی',
+  },
+  {
+    id: '4',
+    imageUrl: '/images/hero/s4.jpeg',
     title: 'آگهی خود را ثبت کنید',
     description: 'مانند بازارچه، محصول دست‌دوم خود را بفروشید',
     link: '/products/new',

@@ -18,7 +18,7 @@ type AddToCartButtonProps = {
   quantity?: number;
   className?: string;
   size?: 'default' | 'sm' | 'lg' | 'icon';
-  variant?: 'default' | 'outline' | 'secondary';
+  variant?: 'default' | 'outline' | 'secondary' | 'destructive';
   showLabel?: boolean;
 };
 
@@ -27,7 +27,7 @@ export function AddToCartButton({
   quantity = 1,
   className,
   size = 'default',
-  variant = 'default',
+  variant = 'destructive',
   showLabel = true,
 }: AddToCartButtonProps) {
   const { addItem } = useCart();
@@ -55,10 +55,10 @@ export function AddToCartButton({
       type="button"
       size={size}
       variant={variant}
-      className={cn('gap-2', className)}
+      className={cn('gap-2 mt-1 text-[13px] w-full bg-red-600 hover:scale-105', className)}
       onClick={handleClick}
     >
-      <ShoppingCart className="size-4" />
+      <ShoppingCart className="size-3.5" />
       {showLabel && (added ? 'اضافه شد' : 'افزودن به سبد')}
     </Button>
   );

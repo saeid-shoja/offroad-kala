@@ -2,7 +2,6 @@
 
 import { formatPrice } from '@offroad/shared';
 import { ChevronDown, Filter, RotateCcw } from 'lucide-react';
-
 import type { LibraryNode } from '@/stores/categories-store';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -152,8 +151,8 @@ export function ProductsFilterSidebar({
             }}
           />
           <div className="text-muted-foreground flex justify-between text-xs">
-            <span>{formatPrice(filters.minPrice)}</span>
             <span>{formatPrice(filters.maxPrice)}</span>
+            <span>{formatPrice(filters.minPrice)}</span>
           </div>
         </div>
 

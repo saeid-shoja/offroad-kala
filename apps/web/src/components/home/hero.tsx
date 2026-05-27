@@ -73,12 +73,12 @@ export function HeroSlider() {
       <Carousel
         setApi={setApi}
         opts={{ loop: true }}
-        className="h-[calc(60svh-3.5rem)] w-full"
+        className="h-[calc(65svh-3.5rem)] w-full"
       >
         <CarouselContent className="ms-0 h-full">
           {slides.map((slide) => (
             <CarouselItem key={slide.id} className="ps-0">
-              <div className="relative h-[calc(60svh-3.5rem)] w-full overflow-hidden">
+              <div className="relative h-[calc(65svh-3.5rem)] w-full overflow-hidden">
                 <Image
                   src={slide.imageUrl}
                   alt={slide.title}
@@ -87,8 +87,8 @@ export function HeroSlider() {
                   className="object-cover"
                   sizes="100vw"
                 />
-                <div className="from-background/95 via-background/40 absolute inset-0 bg-linear-to-t to-transparent" />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 pb-16 md:p-12 md:pb-20">
+                <div className="from-background/95 via-background/10 absolute inset-0 bg-linear-to-t to-transparent" />
+                <div className="absolute inset-0 flex flex-col justify-end p-6 pb-16 md:p-12 md:pb-10">
                   <div className="mx-auto w-full max-w-7xl">
                     <h1 className="text-foreground max-w-2xl text-3xl font-bold md:text-5xl">
                       {slide.title}

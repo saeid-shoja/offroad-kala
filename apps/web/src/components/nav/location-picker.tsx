@@ -36,7 +36,7 @@ export function LocationPicker() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="max-w-[11rem] gap-1.5">
+        <Button variant="outline" className="max-w-44 gap-1.5">
           <MapPin className="h-4 w-4 shrink-0" />
           <span className="truncate">{label}</span>
           <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-60" />

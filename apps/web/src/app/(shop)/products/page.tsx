@@ -234,13 +234,13 @@ function ProductsPageContent() {
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
                   key={i}
-                  className="bg-muted aspect-[4/5] animate-pulse rounded-lg"
+                  className="bg-muted aspect-4/5 animate-pulse rounded-sm"
                 />
               ))}
             </div>
           ) : products.length > 0 ? (
             <>
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-4 gap-4 md:grid-cols-5">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

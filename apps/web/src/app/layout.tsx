@@ -6,8 +6,8 @@ import { Navbar } from '@/components/layout/navbar';
 import { SiteFooter } from '@/components/layout/site-footer';
 
 export const metadata: Metadata = {
-  title: 'آفرود شاپ | خرید و فروش لوازم آفرود',
-  description: 'فروشگاه آنلاین لوازم آفرود و بازارچه خرید و فروش محصولات استوک آفرودی',
+  title: 'آفرود شاپ | خرید و فروش تجهیزات استوک آفرودی',
+  description: 'فروشگاه آنلاین لوازم آفرود و مزایده آگهی های خرید و فروش محصولات استوک آفرودی',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

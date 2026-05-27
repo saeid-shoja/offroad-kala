@@ -30,7 +30,7 @@ export function Navbar() {
 
   return (
     <nav className="bg-background/85 sticky top-0 z-50 border-b backdrop-blur supports-backdrop-filter:bg-background/80">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-4">
             <Link href="/" className="text-primary flex shrink-0 items-center gap-2 text-xl font-bold">
@@ -64,28 +64,23 @@ export function Navbar() {
               <div className="bg-muted h-8 w-20 animate-pulse rounded" />
             ) : user ? (
               <>
-                <Button asChild size="sm">
+                <Button asChild>
                   <Link href="/products/new">
-                    <PlusCircle className="h-4 w-4" />
-                    ثبت آگهی
+                    <PlusCircle className="h-5 w-5" />
                   </Link>
                 </Button>
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" asChild>
                   <Link href="/dashboard">
-                    <User className="h-4 w-4" />
-                    {user.name}
+                    <User className="h-5 w-5" />
                   </Link>
-                </Button>
-                <Button variant="ghost" size="icon" onClick={logout} aria-label="خروج">
-                  <LogOut className="h-4 w-4" />
                 </Button>
               </>
             ) : (
               <>
-                <Button variant="outline" size="sm" asChild>
+                <Button variant="outline" asChild>
                   <Link href="/login">ورود</Link>
                 </Button>
-                <Button size="sm" asChild>
+                <Button asChild>
                   <Link href="/register">ثبت نام</Link>
                 </Button>
               </>

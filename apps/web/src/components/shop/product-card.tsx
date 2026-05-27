@@ -90,22 +90,22 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         <CardContent className="space-y-2 p-3">
-          <h3 className="line-clamp-2 min-h-[2.5rem] text-sm leading-snug font-semibold">
+          <h3 className="line-clamp-2 min-h-6 text-xs leading-snug font-semibold">
             {product.title}
           </h3>
 
-          <p className="text-primary text-lg font-bold">
+          <p className="text-primary text-xs font-semibold">
             {formatPrice(product.price)}{' '}
             <span className="text-muted-foreground text-xs font-normal">تومان</span>
           </p>
 
-          <div className="text-muted-foreground flex flex-col gap-1.5 text-xs">
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5 shrink-0" />
+          <div className="text-muted-foreground flex flex-col gap-1 text-[10px]">
+            <span className="flex items-center gap-0.5">
+              <MapPin className="h-3 w-3 shrink-0" />
               {product.city || 'نامشخص'}
             </span>
             <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5 shrink-0" />
+              <Clock className="h-2.5 w-2.5 shrink-0" />
               {postedAt}
             </span>
           </div>
@@ -113,7 +113,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
 
       {canBuy && (
-        <div className="mt-auto border-t p-3 pt-0">
+        <div className="-mb-1 border-t p-3 pt-0">
           <AddToCartButton
             product={product}
             className="w-full"
