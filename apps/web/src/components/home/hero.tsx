@@ -73,12 +73,12 @@ export function HeroSlider() {
       <Carousel
         setApi={setApi}
         opts={{ loop: true }}
-        className="h-[calc(65svh-3.5rem)] w-full"
+        className="h-[calc(75svh-3.5rem)] w-full"
       >
         <CarouselContent className="ms-0 h-full">
           {slides.map((slide) => (
             <CarouselItem key={slide.id} className="ps-0">
-              <div className="relative h-[calc(65svh-3.5rem)] w-full overflow-hidden">
+              <div className="relative h-[calc(75svh-3.5rem)] w-full overflow-hidden">
                 <Image
                   src={slide.imageUrl}
                   alt={slide.title}
@@ -87,20 +87,20 @@ export function HeroSlider() {
                   className="object-cover"
                   sizes="100vw"
                 />
-                <div className="from-background/95 via-background/10 absolute inset-0 bg-linear-to-t to-transparent" />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 pb-16 md:p-12 md:pb-10">
+                <div className="from-black/65 via-black/10 absolute inset-0 bg-linear-to-t to-transparent" />
+                <div className="absolute inset-0 flex flex-col justify-end p-6 pb-16 md:p-8 md:pb-10">
                   <div className="mx-auto w-full max-w-7xl">
-                    <h1 className="text-foreground max-w-2xl text-3xl font-bold md:text-5xl">
+                    <h1 className="text-white max-w-2xl text-2xl font-bold md:text-4xl bg-red-500/70 p-3 rounded-2xl">
                       {slide.title}
                     </h1>
                     {slide.description && (
-                      <p className="text-muted-foreground mt-4 max-w-xl text-lg md:text-xl">
+                      <p className="text-card dark:text-accent-foreground mt-4 max-w-xl text-md md:text-lg bg-red-500/70 p-3 rounded-2xl">
                         {slide.description}
                       </p>
                     )}
                     {slide.link && (
                       <div className="mt-6">
-                        <Button asChild size="lg">
+                        <Button asChild size="lg" className='w-[250px] rounded-md mr-10'>
                           <Link href={slide.link}>
                             {slide.linkLabel ?? 'مشاهده بیشتر'}
                           </Link>

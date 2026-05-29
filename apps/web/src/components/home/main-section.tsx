@@ -34,8 +34,38 @@ export default function MainSection() {
 
   return (
     <div className="space-y-10">
-      <section>
-        <div className="my-6 flex items-center justify-between">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3 container">
+        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
+          <Shield className="text-primary h-10 w-10" />
+          <div>
+            <h3 className="font-bold">با تضمین فروشگاه</h3>
+            <p className="text-muted-foreground mt-1 text-sm">
+              محصولات دارای نشان تضمین، اصالت کالا را از فروشگاه ما دارند
+            </p>
+          </div>
+        </div>
+        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
+          <TrendingUp className="text-secondary h-10 w-10" />
+          <div>
+            <h3 className="font-bold">پله شده</h3>
+            <p className="text-muted-foreground mt-1 text-sm">
+              با فعال‌سازی گزینه پله، آگهی شما در بالای لیست نمایش داده می‌شود
+            </p>
+          </div>
+        </div>
+        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
+          <PackageSearch className="text-accent h-10 w-10" />
+          <div>
+            <h3 className="font-bold">خرید و فروش آسان</h3>
+            <p className="text-muted-foreground mt-1 text-sm">
+              مانند دیوار، آگهی خود را ثبت کنید و محصولتان را بفروشید
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className='bg-border/30 p-5 my-5 w-full'>
+        <div className="mb-5 flex items-center justify-between container">
           <h2 className="flex items-center gap-2 text-xl font-bold">
             <Store className="text-primary h-6 w-6" />
             محصولات فروشگاه
@@ -45,7 +75,7 @@ export default function MainSection() {
           </Link>
         </div>
         {shopProducts.length > 0 ? (
-          <div className="grid gap-4 grid-cols-4 lg:grid-cols-6 bg-blue-200 py-20 w-full">
+          <div className="grid gap-4 grid-cols-4 lg:grid-cols-6 w-full container">
             {shopProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -55,8 +85,8 @@ export default function MainSection() {
         )}
       </section>
 
-      <section className="from-violet-500/10 to-violet-500/5 rounded-lg bg-gradient-to-r p-6">
-        <div className="mb-6 flex items-center justify-between">
+      <section className="border-y border-secondary/50 p-6 w-full">
+        <div className="mb-6 flex items-center justify-between container">
           <h2 className="flex items-center gap-2 text-xl font-bold">
             <Gavel className="text-violet-600 h-6 w-6" />
             مزایده‌ها
@@ -66,7 +96,7 @@ export default function MainSection() {
           </Link>
         </div>
         {auctionProducts.length > 0 ? (
-          <div className="grid grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-4 lg:grid-cols-6 gap-4 container">
             {auctionProducts.map((product) => (
               <AuctionProductCard key={product.id} product={product} />
             ))}
@@ -78,8 +108,8 @@ export default function MainSection() {
         )}
       </section>
 
-      <section className="from-secondary/10 to-secondary/5 rounded-lg bg-gradient-to-r p-6">
-        <div className="mb-6 flex items-center justify-between">
+      <section className="border-y border-border p-6">
+        <div className="mb-6 flex items-center justify-between container">
           <h2 className="flex items-center gap-2 text-xl font-bold">
             <PackageSearch className="text-secondary h-6 w-6" />
             آگهی‌های کاربران
@@ -89,7 +119,7 @@ export default function MainSection() {
           </Link>
         </div>
         {clientProducts.length > 0 ? (
-          <div className="grid gap-4 grid-cols-4 lg:grid-cols-6">
+          <div className="grid gap-4 grid-cols-4 lg:grid-cols-6 container">
             {clientProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -99,7 +129,7 @@ export default function MainSection() {
         )}
       </section>
 
-      <section>
+      <section className='container'>
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold">دسته‌بندی محصولات</h2>
           <Link href="/categories" className="text-primary text-sm hover:underline">
@@ -130,36 +160,6 @@ export default function MainSection() {
         ) : (
           <p className="text-muted-foreground py-8 text-center">دسته‌بندی‌ای یافت نشد</p>
         )}
-      </section>
-
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
-          <Shield className="text-primary h-10 w-10" />
-          <div>
-            <h3 className="font-bold">با تضمین فروشگاه</h3>
-            <p className="text-muted-foreground mt-1 text-sm">
-              محصولات دارای نشان تضمین، اصالت کالا را از فروشگاه ما دارند
-            </p>
-          </div>
-        </div>
-        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
-          <TrendingUp className="text-secondary h-10 w-10" />
-          <div>
-            <h3 className="font-bold">پله شده</h3>
-            <p className="text-muted-foreground mt-1 text-sm">
-              با فعال‌سازی گزینه پله، آگهی شما در بالای لیست نمایش داده می‌شود
-            </p>
-          </div>
-        </div>
-        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
-          <PackageSearch className="text-accent h-10 w-10" />
-          <div>
-            <h3 className="font-bold">خرید و فروش آسان</h3>
-            <p className="text-muted-foreground mt-1 text-sm">
-              مانند دیوار، آگهی خود را ثبت کنید و محصولتان را بفروشید
-            </p>
-          </div>
-        </div>
       </section>
     </div>
   );

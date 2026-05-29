@@ -19,7 +19,7 @@ const accountLinks = [
 
 const infoLinks = [
   { href: '/products', label: 'جستجوی محصول' },
-  { href: '/categories', label: 'برندها و دسته‌ها' },
+  { href: '/categories', label: 'دسته بندی ها' },
   { href: '#', label: 'قوانین و مقررات' },
   { href: '#', label: 'تماس با ما' },
 ];
@@ -39,7 +39,7 @@ function FooterColumn({
           <li key={link.href + link.label}>
             <Link
               href={link.href}
-              className="text-muted-foreground hover:text-primary text-sm transition-colors"
+              className="text-muted-foreground hover:text-secondary text-sm transition-colors"
             >
               {link.label}
             </Link>
@@ -61,12 +61,12 @@ export function SiteFooter() {
               آفرود شاپ
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              خرید و فروش لوازم آفرود، قطعات یدکی و تجهیزات آفرودی با تضمین کیفیت.
+              خرید و فروش لوازم آفرود، قطعات یدکی و تجهیزات آفرودی دست دوم و مزایده ای.
             </p>
             <div className="text-muted-foreground space-y-2 text-sm">
               <p className="flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0" />
-                ۰۲۱-۱۲۳۴۵۶۷۸
+                09333092013
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />

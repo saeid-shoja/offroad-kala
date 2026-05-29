@@ -51,7 +51,7 @@ export default function OrdersPage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 container">
       <h1 className="text-2xl font-bold">سفارش‌های من</h1>
 
       {orders.length === 0 ? (

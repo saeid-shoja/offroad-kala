@@ -27,7 +27,7 @@ export function AddToCartButton({
   quantity = 1,
   className,
   size = 'default',
-  variant = 'destructive',
+  variant = 'default',
   showLabel = true,
 }: AddToCartButtonProps) {
   const { addItem } = useCart();
@@ -55,7 +55,7 @@ export function AddToCartButton({
       type="button"
       size={size}
       variant={variant}
-      className={cn('gap-2 mt-1 text-[13px] w-full bg-red-600 hover:scale-105', className)}
+      className={cn('gap-2 mt-1 text-[13px] w-full hover:scale-105', className)}
       onClick={handleClick}
     >
       <ShoppingCart className="size-3.5" />

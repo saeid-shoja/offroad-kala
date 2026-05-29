@@ -6,6 +6,7 @@ import { Clock, Gavel, MapPin, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 type AuctionProductCardProps = {
   product: {
@@ -40,10 +41,12 @@ export function AuctionProductCard({ product }: AuctionProductCardProps) {
       <Link href={`/product/${product.id}`} className="group block">
         <div className="relative aspect-square overflow-hidden bg-muted">
           {firstImage ? (
-            <img
+            <Image
+              width={100}
+              height={100}
               src={firstImage}
               alt={product.title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 border-3 border-card rounded-sm"
             />
           ) : (
             <div className="text-muted-foreground flex h-full items-center justify-center text-sm">
@@ -58,12 +61,12 @@ export function AuctionProductCard({ product }: AuctionProductCardProps) {
           </div>
         </div>
         <CardContent className="space-y-2 p-3">
-          <h3 className="line-clamp-2 min-h-[2.5rem] text-sm leading-snug font-semibold">
+          <h3 className="line-clamp-2 min-h-10 text-sm leading-snug font-semibold">
             {product.title}
           </h3>
-          <p className="text-primary text-lg font-bold">
+          <p className="text-foreground text-sm font-bold">
             {formatPrice(currentPrice)}{' '}
-            <span className="text-muted-foreground text-xs font-normal">تومان</span>
+            <span className="text-xs font-normal">تومان</span>
           </p>
           <div className="text-muted-foreground flex flex-col gap-1.5 text-xs">
             <span className="flex items-center gap-1">

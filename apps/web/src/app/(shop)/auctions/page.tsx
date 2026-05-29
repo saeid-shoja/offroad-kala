@@ -22,7 +22,7 @@ export default function AuctionsPage() {
   }, []);
 
   return (
-    <div className="space-y-8 py-6">
+    <div className="space-y-8 py-6 container">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold">

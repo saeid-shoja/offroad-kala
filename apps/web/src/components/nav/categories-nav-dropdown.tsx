@@ -143,7 +143,7 @@ export function CategoriesNavDropdown({
   const { libraries, loading, error } = useCategories();
 
   return (
-    <Menubar className="h-auto border-0 bg-transparent p-0 shadow-none">
+    <Menubar className="h-auto border-0 bg-card p-0 shadow-none">
       <MenubarMenu>
         <MenubarTrigger
           className={cn(

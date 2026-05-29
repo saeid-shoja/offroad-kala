@@ -12,4 +12,4 @@ turbo/
 coverage/
 apps/api/src/prisma/generated/
 
-
+.DS_Store

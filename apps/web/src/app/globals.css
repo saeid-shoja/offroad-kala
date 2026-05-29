@@ -50,7 +50,7 @@
   --muted-foreground: #94a3b8;
   --accent: #334155;
   --accent-foreground: #f8fafc;
-  --destructive: #f87171;
+  --destructive: #f14b4b;
   --border: #334155;
   --input: #334155;
   --ring: #60a5fa;
@@ -95,8 +95,11 @@
   }
 
   body {
-    font-family: var(--font-sans);
     @apply bg-background text-foreground;
     direction: rtl;
+  }
+
+  .container {
+    @apply mx-auto w-full max-w-7xl;
   }
 }

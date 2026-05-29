@@ -30,7 +30,7 @@ export function NavbarSearch({ className }: { className?: string }) {
             goToSearch();
           }
         }}
-        className="bg-muted/50 h-10 w-full pr-10"
+        className="bg-card h-10 w-full pr-10 border-none placeholder:text-muted-foreground/60"
         aria-label="جستجوی محصول"
       />
     </div>

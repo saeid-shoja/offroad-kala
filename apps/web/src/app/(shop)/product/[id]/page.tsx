@@ -49,7 +49,7 @@ export default function ProductDetailPage() {
   const canBuy = isPurchasable(product);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-2">
+    <div className="grid gap-8 lg:grid-cols-2 container">
       <div className="space-y-3">
         <div className="overflow-hidden rounded-lg bg-gray-100">
           {images[currentImage] ? (

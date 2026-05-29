@@ -104,7 +104,7 @@ export default function CheckoutPage() {
   const total = previewTotal ?? subtotal;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 container">
       <h1 className="text-2xl font-bold">تسویه حساب</h1>
 
       <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-3">

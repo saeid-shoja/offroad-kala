@@ -37,7 +37,7 @@ export default function CategoryPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 container">
       <h1 className="text-2xl font-bold">{category.name}</h1>
       {products.length > 0 ? (
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">

@@ -32,8 +32,8 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-8">
-      <div className="rounded-lg border bg-white p-6">
+    <div className="space-y-8 container">
+      <div className="rounded-lg border bg-card p-6">
         <div className="flex items-center gap-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
             <User className="h-8 w-8" />

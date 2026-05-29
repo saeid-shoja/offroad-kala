@@ -59,7 +59,7 @@ export function ProductCard({ product }: ProductCardProps) {
             height={100}
             src={firstImage || '/images/product/no-photo.jpg'}
             alt={product.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 border-3 border-card rounded-sm"
           />
           <div className="absolute top-2 right-2 flex flex-col gap-1">
             {situationLabel && (
@@ -94,9 +94,9 @@ export function ProductCard({ product }: ProductCardProps) {
             {product.title}
           </h3>
 
-          <p className="text-primary text-xs font-semibold">
+          <p className="text-foreground text-xs font-semibold">
             {formatPrice(product.price)}{' '}
-            <span className="text-muted-foreground text-xs font-normal">تومان</span>
+            <span className="text-foreground text-xs font-normal">تومان</span>
           </p>
 
           <div className="text-muted-foreground flex flex-col gap-1 text-[10px]">

@@ -16,7 +16,7 @@ export default function CategoriesPage() {
   const brandsLib = libraries.find((l) => l.slug === 'car-brands');
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 container">
       <section className="space-y-6">
         <h1 className="text-2xl font-bold">کتابخانه‌ها</h1>
 
