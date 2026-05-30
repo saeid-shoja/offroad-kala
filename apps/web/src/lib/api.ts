@@ -18,9 +18,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   try {
     res = await fetch(`${API_URL}${endpoint}`, { ...options, headers });
   } catch {
-    throw new Error(
-      'اتصال به API برقرار نشد. سرور را روی http://localhost:4000 اجرا کنید.',
-    );
+    throw new Error('اتصال به API برقرار نشد. سرور را روی http://localhost:4000 اجرا کنید.');
   }
 
   if (!res.ok) {
@@ -32,24 +30,34 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
-
   auth: {
     register: (data: { phone: string; name: string; password: string; city?: string }) =>
-      request<{ token: string; user: any }>('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+      request<{ token: string; user: any }>('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
     login: (data: { phone: string; password: string }) =>
-      request<{ token: string; user: any }>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+      request<{ token: string; user: any }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
     profile: () => request<any>('/auth/profile'),
   },
 
   products: {
     list: (params?: Record<string, string>) => {
-      const qs = params ? '?' + new URLSearchParams(params).toString() : '';
-      return request<{ products: any[]; total: number; page: number; totalPages: number }>(`/products${qs}`);
+      const qs = params ? `?${new URLSearchParams(params).toString()}` : '';
+      return request<{ products: any[]; total: number; page: number; totalPages: number }>(
+        `/products${qs}`,
+      );
     },
     get: (id: string) => request<any>(`/products/${id}`),
-    create: (data: any) => request<any>('/products', { method: 'POST', body: JSON.stringify(data) }),
-    createPublic: (data: any) => request<any>('/products/public', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: any) => request<any>(`/products/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+    create: (data: any) =>
+      request<any>('/products', { method: 'POST', body: JSON.stringify(data) }),
+    createPublic: (data: any) =>
+      request<any>('/products/public', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: any) =>
+      request<any>(`/products/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id: string) => request<any>(`/products/${id}`, { method: 'DELETE' }),
   },
 
@@ -81,9 +89,7 @@ export const api = {
 
   orders: {
     my: () => request<any[]>('/orders/my'),
-    preview: (data: {
-      items: { productId: string; quantity: number }[];
-    }) =>
+    preview: (data: { items: { productId: string; quantity: number }[] }) =>
       request<{
         items: Array<{
           productId: string;
@@ -110,9 +116,10 @@ export const api = {
   users: {
     profile: () => request<any>('/users/profile'),
     products: () => request<any[]>('/users/products'),
-    updateProfile: (data: any) => request<any>('/users/profile', { method: 'PATCH', body: JSON.stringify(data) }),
+    updateProfile: (data: any) =>
+      request<any>('/users/profile', { method: 'PATCH', body: JSON.stringify(data) }),
   },
-  
+
   auctions: {
     summary: (productId: string) => request<any>(`/auctions/${productId}/summary`),
     placeBid: (

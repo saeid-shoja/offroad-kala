@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { ShoppingBag } from 'lucide-react';
+import Link from 'next/link';
 
 import { CartLineItem } from '@/components/cart/cart-line-item';
 import { CartSummary } from '@/components/cart/cart-summary';

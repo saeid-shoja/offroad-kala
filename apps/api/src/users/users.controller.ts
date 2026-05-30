@@ -1,10 +1,10 @@
-import { Controller, Get, Patch, Body, Request } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UpdateProfileDto } from './dto';
+import { Body, Controller, Get, Patch, Request } from '@nestjs/common';
+import type { UpdateProfileDto } from './dto';
+import type { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) { }
+  constructor(private usersService: UsersService) {}
 
   @Get('profile')
   getProfile(@Request() req: { user: { userId: string } }) {
@@ -17,10 +17,7 @@ export class UsersController {
   }
 
   @Patch('profile')
-  updateProfile(
-    @Request() req: { user: { userId: string } },
-    @Body() body: UpdateProfileDto,
-  ) {
+  updateProfile(@Request() req: { user: { userId: string } }, @Body() body: UpdateProfileDto) {
     return this.usersService.updateProfile(req.user.userId, body);
   }
 }

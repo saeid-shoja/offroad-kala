@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -25,7 +25,7 @@
   --ring: #2563eb;
   --radius: 0.625rem;
 
-  --font-sans: 'IranSans', 'Vazir', 'Tahoma', system-ui, sans-serif;
+  --font-sans: "IranSans", "Vazir", "Tahoma", system-ui, sans-serif;
   --color-primary: #2563eb;
   --color-primary-dark: #1d4ed8;
   --color-primary-light: #dbeafe;

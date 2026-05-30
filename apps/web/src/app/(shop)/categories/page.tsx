@@ -1,24 +1,24 @@
 'use client';
 
-import Link from 'next/link';
+import { getCarBrandLabel, isCarBrand, MOTORCYCLE_ATV_SLUG } from '@offroad/shared';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 import { CategoryCard } from '@/components/shop/category-card';
-import { useCategories } from '@/stores/categories-store';
 import { Button } from '@/components/ui/button';
 import { getLibraryNodeHref } from '@/lib/library-links';
-import { getCarBrandLabel, isCarBrand } from '@offroad/shared';
+import { useCategories } from '@/stores/categories-store';
 
 export default function CategoriesPage() {
   const { libraries, loading, error, refetch } = useCategories();
 
   const partsLib = libraries.find((l) => l.slug === 'parts');
-  const motorcycleLib = libraries.find((l) => l.slug === 'motorcycle-atv');
+  const motorcycleLib = libraries.find((l) => l.slug === MOTORCYCLE_ATV_SLUG);
   const brandsLib = libraries.find((l) => l.slug === 'car-brands');
 
   return (
     <div className="space-y-10 container">
       <section className="space-y-6">
-        <h1 className="text-2xl font-bold">کتابخانه‌ها</h1>
+        <h1 className="text-2xl font-bold">دسته بندی ها</h1>
 
         {loading ? (
           <div className="text-muted-foreground flex items-center justify-center gap-2 py-16">

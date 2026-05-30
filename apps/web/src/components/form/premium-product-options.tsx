@@ -1,11 +1,7 @@
 'use client';
 
+import { BOOST_LISTING_FEE, formatPrice, getGuaranteeFee } from '@offroad/shared';
 import { Shield, TrendingUp } from 'lucide-react';
-import {
-  BOOST_LISTING_FEE,
-  formatPrice,
-  getGuaranteeFee,
-} from '@offroad/shared';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -92,12 +88,11 @@ export function PremiumProductOptions({
               <DialogDescription asChild>
                 <div className="text-foreground space-y-3 text-start text-sm">
                   <p>
-                    با فعال‌سازی تضمین فروشگاه، محصول شما با نشان ویژه نمایش داده می‌شود و
-                    خریداران می‌توانند آن را مستقیماً از طریق سایت خریداری کنند.
+                    با فعال‌سازی تضمین فروشگاه، محصول شما با نشان ویژه نمایش داده می‌شود و خریداران
+                    می‌توانند آن را مستقیماً از طریق سایت خریداری کنند.
                   </p>
                   <p>
-                    <strong>هزینه:</strong> معادل{' '}
-                    <strong>۵٪ قیمت فروش محصول</strong>
+                    <strong>هزینه:</strong> معادل <strong>۵٪ قیمت فروش محصول</strong>
                     {hasValidPrice && (
                       <>
                         {' '}
@@ -107,7 +102,8 @@ export function PremiumProductOptions({
                   </p>
                   <p>
                     <strong>زمان پرداخت:</strong> این مبلغ پس از{' '}
-                    <strong>فروش موفق محصول در وب‌سایت</strong> از شما دریافت می‌شود، نه هنگام ثبت آگهی.
+                    <strong>فروش موفق محصول در وب‌سایت</strong> از شما دریافت می‌شود، نه هنگام ثبت
+                    آگهی.
                   </p>
                   <p className="text-muted-foreground text-xs">
                     تا زمان فروش، هیچ هزینه‌ای بابت تضمین فروشگاه پرداخت نمی‌کنید.
@@ -152,16 +148,16 @@ export function PremiumProductOptions({
               <DialogDescription asChild>
                 <div className="text-foreground space-y-3 text-start text-sm">
                   <p>
-                    آگهی پله‌شده در بالای لیست محصولات و نتایج جستجو نمایش داده می‌شود و
-                    شانس دیده شدن آگهی شما بیشتر می‌شود.
+                    آگهی پله‌شده در بالای لیست محصولات و نتایج جستجو نمایش داده می‌شود و شانس دیده شدن
+                    آگهی شما بیشتر می‌شود.
                   </p>
                   <p>
-                    <strong>هزینه:</strong>{' '}
-                    <strong>{formatPrice(BOOST_LISTING_FEE)} تومان</strong> به‌صورت یک‌جا
+                    <strong>هزینه:</strong> <strong>{formatPrice(BOOST_LISTING_FEE)} تومان</strong>{' '}
+                    به‌صورت یک‌جا
                   </p>
                   <p>
-                    <strong>زمان پرداخت:</strong> پس از کلیک روی دکمه «ثبت آگهی»، پنجره
-                    پرداخت نمایش داده می‌شود و پس از تأیید پرداخت، آگهی با وضعیت پله‌شده ثبت می‌شود.
+                    <strong>زمان پرداخت:</strong> پس از کلیک روی دکمه «ثبت آگهی»، پنجره پرداخت نمایش
+                    داده می‌شود و پس از تأیید پرداخت، آگهی با وضعیت پله‌شده ثبت می‌شود.
                   </p>
                   <p className="text-muted-foreground text-xs">
                     در حال حاضر پرداخت به‌صورت شبیه‌سازی‌شده انجام می‌شود (بدون درگاه واقعی).

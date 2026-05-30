@@ -1,18 +1,15 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
-  ForbiddenException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { Advertiser, CarBrand, ProductSituation } from '../prisma/generated/client';
+import { getAuctionCurrentPrice, isAuctionActive } from '../common/auction';
 import { getCarBrandLabel, parseCarBrands } from '../common/car-brands';
-import {
-  getAuctionCurrentPrice,
-  isAuctionActive,
-} from '../common/auction';
 import { isPurchasableProduct } from '../common/purchasable';
-import { CreateProductDto, UpdateProductDto } from './dto';
+import type { Advertiser, CarBrand, ProductSituation } from '../prisma/generated/client';
+import type { PrismaService } from '../prisma/prisma.service';
+import type { CreateProductDto, UpdateProductDto } from './dto';
 
 const productInclude = {
   category: true,
@@ -82,10 +79,7 @@ export class ProductsService {
         value: brand,
         label: getCarBrandLabel(brand),
       })),
-      situation:
-        product.advertiser === 'SHOP'
-          ? 'IN_STOCK'
-          : product.situation ?? null,
+      situation: product.advertiser === 'SHOP' ? 'IN_STOCK' : (product.situation ?? null),
       /** @deprecated use advertiser — kept for existing web clients */
       type: product.advertiser,
       purchasable: isPurchasableProduct({
@@ -276,9 +270,7 @@ export class ProductsService {
   async create(data: CreateProductDto, userId?: string) {
     const brands = parseCarBrands(data.carBrands);
     const auctionData = this.buildAuctionCreateData(data);
-    const listingPrice = data.isAuction
-      ? (data.auctionStartPrice ?? data.price)
-      : data.price;
+    const listingPrice = data.isAuction ? (data.auctionStartPrice ?? data.price) : data.price;
 
     const product = await this.prisma.product.create({
       data: {
@@ -295,21 +287,14 @@ export class ProductsService {
         situation: data.situation,
         userId: userId || null,
         ...auctionData,
-        carBrands: brands.length
-          ? { create: brands.map((brand) => ({ brand })) }
-          : undefined,
+        carBrands: brands.length ? { create: brands.map((brand) => ({ brand })) } : undefined,
       },
       include: productIncludeDetail,
     });
     return this.mapProduct(product);
   }
 
-  async update(
-    id: string,
-    data: UpdateProductDto,
-    userId?: string,
-    userRole?: string,
-  ) {
+  async update(id: string, data: UpdateProductDto, userId?: string, userRole?: string) {
     const product = await this.prisma.product.findUnique({ where: { id } });
     if (!product) throw new NotFoundException('محصول یافت نشد');
 

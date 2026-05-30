@@ -11,9 +11,11 @@ const locationStorage: StateStorage = {
     const raw = localStorage.getItem(name);
     if (!raw) return null;
     try {
-      const parsed = JSON.parse(raw) as {
-        state?: { selectedCities?: string[] };
-      } | string[];
+      const parsed = JSON.parse(raw) as
+        | {
+            state?: { selectedCities?: string[] };
+          }
+        | string[];
       if (!Array.isArray(parsed) && parsed.state) return raw;
       if (Array.isArray(parsed)) {
         return JSON.stringify({
@@ -42,8 +44,7 @@ export const useLocationStore = create<LocationState>()(
     (set, get) => ({
       selectedCities: [],
 
-      setSelectedCities: (cities) =>
-        set({ selectedCities: [...new Set(cities)] }),
+      setSelectedCities: (cities) => set({ selectedCities: [...new Set(cities)] }),
 
       toggleCity: (city) => {
         const { selectedCities } = get();

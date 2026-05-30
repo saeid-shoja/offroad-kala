@@ -1,8 +1,9 @@
 'use client';
 
-import Link from 'next/link';
+import { MOTORCYCLE_ATV_SLUG } from '@offroad/shared';
 import { ChevronDown, ChevronLeft, LayoutGrid, Loader2 } from 'lucide-react';
-
+import Link from 'next/link';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Menubar,
   MenubarContent,
@@ -14,23 +15,14 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from '@/components/ui/menubar';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { useCategories, type LibraryNode } from '@/stores/categories-store';
 import { getLibraryNodeHref } from '@/lib/library-links';
 import { cn } from '@/lib/utils';
+import { type LibraryNode, useCategories } from '@/stores/categories-store';
 
 /** Shared row size for parent + submenu panels */
 export const LIBRARY_MENU_WIDTH = 'w-66';
-const MENU_ROW =
-  'flex h-10 w-64 items-center justify-between gap-2 px-3 text-sm outline-none';
-const SUBMENU_PANEL = cn(
-  LIBRARY_MENU_WIDTH,
-  'min-w-62 overflow-y-auto p-1 shadow-lg',
-);
+const MENU_ROW = 'flex h-10 w-64 items-center justify-between gap-2 px-3 text-sm outline-none';
+const SUBMENU_PANEL = cn(LIBRARY_MENU_WIDTH, 'min-w-62 overflow-y-auto p-1 shadow-lg');
 
 /** Chevron on the left, label on the right (RTL) */
 const MENU_ROW_RTL = cn(MENU_ROW, '[&>svg]:shrink-0');
@@ -91,7 +83,11 @@ function PartGroupSubmenuDesktop({ group }: { group: LibraryNode }) {
       </MenubarSubTrigger>
       <MenubarSubContent className={SUBMENU_PANEL}>
         {group.children.map((sub) => (
-          <MenubarItem key={sub.id} asChild className="p-0 focus:bg-transparent flex justify-end px-3">
+          <MenubarItem
+            key={sub.id}
+            asChild
+            className="p-0 focus:bg-transparent flex justify-end px-3"
+          >
             <MenuLinkRow href={getLibraryNodeHref(sub)}>{sub.name}</MenuLinkRow>
           </MenubarItem>
         ))}
@@ -106,11 +102,8 @@ function PartGroupSubmenuDesktop({ group }: { group: LibraryNode }) {
   );
 }
 
-
-
 function LibrarySubmenuDesktop({ library }: { library: LibraryNode }) {
-  const isFlat = library.children.every((c) => c.children.length === 0)
-  console.log('library', library)
+  const isFlat = library.children.every((c) => c.children.length === 0);
   return (
     <MenubarSub>
       <MenubarSubTrigger
@@ -124,22 +117,21 @@ function LibrarySubmenuDesktop({ library }: { library: LibraryNode }) {
       <MenubarSubContent className={SUBMENU_PANEL}>
         {isFlat
           ? library.children.map((item) => (
-            <MenubarItem key={item.id} asChild className="p-0 focus:bg-transparent">
-              <MenuLinkRow className='flex justify-end pr-3' href={getLibraryNodeHref(item)}>{item.name}</MenuLinkRow>
-            </MenubarItem>
-          ))
+              <MenubarItem key={item.id} asChild className="p-0 focus:bg-transparent">
+                <MenuLinkRow className="flex justify-end pr-3" href={getLibraryNodeHref(item)}>
+                  {item.name}
+                </MenuLinkRow>
+              </MenubarItem>
+            ))
           : library.children.map((group) => (
-            <PartGroupSubmenuDesktop key={group.id} group={group} />
-          ))}
+              <PartGroupSubmenuDesktop key={group.id} group={group} />
+            ))}
       </MenubarSubContent>
     </MenubarSub>
   );
 }
 
-export function CategoriesNavDropdown({
-  className,
-  triggerClassName,
-}: CategoriesNavDropdownProps) {
+export function CategoriesNavDropdown({ className, triggerClassName }: CategoriesNavDropdownProps) {
   const { libraries, loading, error } = useCategories();
 
   return (
@@ -150,7 +142,7 @@ export function CategoriesNavDropdown({
             'text-muted-foreground hover:text-primary data-[state=open]:text-primary h-auto gap-2 px-2 py-1.5 text-sm font-normal',
             MENU_ROW_RTL,
             triggerClassName,
-            'w-32'
+            'w-32',
           )}
         >
           <span className="text-end">دسته بندی</span>
@@ -163,15 +155,15 @@ export function CategoriesNavDropdown({
               در حال بارگذاری...
             </div>
           ) : error ? (
-            <p className="text-destructive px-3 py-3 text-center text-xs leading-relaxed">{error}</p>
+            <p className="text-destructive px-3 py-3 text-center text-xs leading-relaxed">
+              {error}
+            </p>
           ) : libraries.length === 0 ? (
             <p className="text-muted-foreground flex h-10 w-56 items-center justify-center text-sm">
               دسته بندی ای یافت نشد
             </p>
           ) : (
-            libraries.map((library) => (
-              <LibrarySubmenuDesktop key={library.id} library={library} />
-            ))
+            libraries.map((library) => <LibrarySubmenuDesktop key={library.id} library={library} />)
           )}
           <MenubarSeparator />
           <MenubarItem asChild className="cursor-pointer px-4 focus:bg-transparent">
@@ -231,7 +223,10 @@ function MobileGroupSection({
         <Link
           href={getLibraryNodeHref(group)}
           onClick={onNavigate}
-          className={cn(MENU_ROW, 'text-muted-foreground hover:bg-accent w-full rounded-sm text-xs')}
+          className={cn(
+            MENU_ROW,
+            'text-muted-foreground hover:bg-accent w-full rounded-sm text-xs',
+          )}
         >
           همه {group.name}
         </Link>
@@ -249,7 +244,8 @@ function MobileLibrarySection({
 }) {
   const isFlat =
     library.kind === 'CAR_BRAND' ||
-    (library.slug === 'motorcycle-atv' && library.children.every((c) => c.children.length === 0));
+    (library.slug === MOTORCYCLE_ATV_SLUG &&
+      library.children.every((c) => c.children.length === 0));
 
   return (
     <Collapsible className="mb-1 w-full">
@@ -265,18 +261,18 @@ function MobileLibrarySection({
       <CollapsibleContent className="border-border/60 mr-2 space-y-0.5 border-r-2 pr-2">
         {isFlat
           ? library.children.map((item) => (
-            <Link
-              key={item.id}
-              href={getLibraryNodeHref(item)}
-              onClick={onNavigate}
-              className={cn(MENU_ROW, 'hover:bg-accent w-full rounded-sm')}
-            >
-              {item.name}
-            </Link>
-          ))
+              <Link
+                key={item.id}
+                href={getLibraryNodeHref(item)}
+                onClick={onNavigate}
+                className={cn(MENU_ROW, 'hover:bg-accent w-full rounded-sm')}
+              >
+                {item.name}
+              </Link>
+            ))
           : library.children.map((group) => (
-            <MobileGroupSection key={group.id} group={group} onNavigate={onNavigate} />
-          ))}
+              <MobileGroupSection key={group.id} group={group} onNavigate={onNavigate} />
+            ))}
       </CollapsibleContent>
     </Collapsible>
   );
@@ -286,9 +282,7 @@ export function CategoriesNavLinks({ onNavigate }: { onNavigate?: () => void }) 
   const { libraries, loading, error } = useCategories();
 
   if (loading) {
-    return (
-      <p className="text-muted-foreground px-3 py-2 text-sm">در حال بارگذاری...</p>
-    );
+    return <p className="text-muted-foreground px-3 py-2 text-sm">در حال بارگذاری...</p>;
   }
 
   if (error) {

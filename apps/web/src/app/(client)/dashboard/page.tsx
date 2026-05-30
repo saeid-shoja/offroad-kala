@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { LogOut, MapPin, PackageSearch, Phone, ShoppingBag, User } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { ProductCard } from '@/components/shop/product-card';
 import { api } from '@/lib/api';
 import { useAuth } from '@/stores/auth-store';
-import { ProductCard } from '@/components/shop/product-card';
-import { PackageSearch, User, Phone, MapPin, LogOut, ShoppingBag } from 'lucide-react';
-import Link from 'next/link';
 
 export default function DashboardPage() {
   const { user, loading: authLoading, logout } = useAuth();
@@ -20,8 +20,14 @@ export default function DashboardPage() {
       return;
     }
     if (user) {
-      api.users.profile().then(setProfile).catch(() => { });
-      api.users.products().then(setProducts).catch(() => { });
+      api.users
+        .profile()
+        .then(setProfile)
+        .catch(() => {});
+      api.users
+        .products()
+        .then(setProducts)
+        .catch(() => {});
     }
   }, [user, authLoading, router]);
 

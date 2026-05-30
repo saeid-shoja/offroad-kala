@@ -1,26 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { formatPrice } from '@offroad/shared';
 import { CreditCard, Loader2, Truck } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { CartLineItem } from '@/components/cart/cart-line-item';
+import { FormError } from '@/components/form/form-message';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FormError } from '@/components/form/form-message';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/stores/auth-store';
 import { api } from '@/lib/api';
-import { useCart } from '@/stores/cart-store';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/stores/auth-store';
+import { useCart } from '@/stores/cart-store';
 
 type PaymentMethod = 'ONLINE' | 'COD';
 
-const PAYMENT_OPTIONS: { value: PaymentMethod; label: string; desc: string; icon: typeof CreditCard }[] = [
+const PAYMENT_OPTIONS: {
+  value: PaymentMethod;
+  label: string;
+  desc: string;
+  icon: typeof CreditCard;
+}[] = [
   {
     value: 'ONLINE',
     label: 'پرداخت آنلاین',

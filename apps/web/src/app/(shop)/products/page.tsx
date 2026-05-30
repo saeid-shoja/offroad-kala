@@ -1,26 +1,21 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { SITE_NAME_FA } from '@offroad/shared';
 import { SlidersHorizontal } from 'lucide-react';
-import { api } from '@/lib/api';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { ProductCard } from '@/components/shop/product-card';
 import {
   ProductsFilterSidebar,
   type ProductsFilters,
 } from '@/components/shop/products-filter-sidebar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { api } from '@/lib/api';
+import { PRICE_FILTER_MAX } from '@/lib/product-utils';
 import { useCategories } from '@/stores/categories-store';
 import { useLocationFilter } from '@/stores/location-store';
-import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { PRICE_FILTER_MAX } from '@/lib/product-utils';
-import { Badge } from '@/components/ui/badge';
 
 const defaultFilters: ProductsFilters = {
   categoryId: '',
@@ -108,21 +103,7 @@ function ProductsPageContent() {
   useEffect(() => {
     if (categoriesLoading) return;
     fetchProducts(page);
-  }, [
-    activeTab,
-    page,
-    searchQuery,
-    filters.categoryId,
-    filters.carBrand,
-    filters.postedWithin,
-    filters.situation,
-    filters.hasGuarantee,
-    filters.minPrice,
-    filters.maxPrice,
-    selectedCities,
-    categoriesLoading,
-    fetchProducts,
-  ]);
+  }, [page, categoriesLoading, fetchProducts]);
 
   const handleApplyFilters = () => {
     setPage(1);
@@ -164,7 +145,7 @@ function ProductsPageContent() {
               ? 'محصولات فروشگاه'
               : activeTab === 'AUCTION'
                 ? 'مزایده‌ها'
-                : 'بازارچه آفرود'}
+                : `بازارچه ${SITE_NAME_FA}`}
           </h1>
           {searchQuery && (
             <p className="text-muted-foreground mt-1 text-sm">
@@ -207,9 +188,7 @@ function ProductsPageContent() {
       </div>
 
       <div className="flex flex-col gap-6 lg:flex-row">
-        <aside className="hidden w-full shrink-0 lg:block lg:w-72">
-          {filterSidebar}
-        </aside>
+        <aside className="hidden w-full shrink-0 lg:block lg:w-72">{filterSidebar}</aside>
 
         <div className="min-w-0 flex-1 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
@@ -232,10 +211,7 @@ function ProductsPageContent() {
           {loading ? (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="bg-muted aspect-4/5 animate-pulse rounded-sm"
-                />
+                <div key={i} className="bg-muted aspect-4/5 animate-pulse rounded-sm" />
               ))}
             </div>
           ) : products.length > 0 ? (
@@ -264,9 +240,7 @@ function ProductsPageContent() {
           ) : (
             <div className="text-muted-foreground py-16 text-center">
               <p className="text-lg">محصولی یافت نشد</p>
-              <p className="mt-2 text-sm">
-                جستجو، شهر یا فیلترها را تغییر دهید
-              </p>
+              <p className="mt-2 text-sm">جستجو، شهر یا فیلترها را تغییر دهید</p>
             </div>
           )}
         </div>
@@ -278,9 +252,7 @@ function ProductsPageContent() {
 export default function ProductsPage() {
   return (
     <Suspense
-      fallback={
-        <div className="text-muted-foreground py-16 text-center">در حال بارگذاری...</div>
-      }
+      fallback={<div className="text-muted-foreground py-16 text-center">در حال بارگذاری...</div>}
     >
       <ProductsPageContent />
     </Suspense>

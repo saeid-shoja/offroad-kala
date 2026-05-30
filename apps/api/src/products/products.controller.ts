@@ -1,21 +1,11 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  Query,
-  Request,
-} from '@nestjs/common';
-import { ProductsService } from './products.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request } from '@nestjs/common';
 import { Public } from '../auth/custom.decorator';
-import { CreateProductDto, FindProductsQueryDto, UpdateProductDto } from './dto';
+import type { CreateProductDto, FindProductsQueryDto, UpdateProductDto } from './dto';
+import type { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private productsService: ProductsService) { }
+  constructor(private productsService: ProductsService) {}
 
   @Public()
   @Get()
@@ -52,10 +42,7 @@ export class ProductsController {
   }
 
   @Post('public')
-  createPublic(
-    @Body() body: CreateProductDto,
-    @Request() req: { user: { userId: string } },
-  ) {
+  createPublic(@Body() body: CreateProductDto, @Request() req: { user: { userId: string } }) {
     return this.productsService.create({ ...body, advertiser: 'CLIENT' }, req.user.userId);
   }
 
@@ -69,10 +56,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  remove(
-    @Param('id') id: string,
-    @Request() req: { user: { userId: string; role: string } },
-  ) {
+  remove(@Param('id') id: string, @Request() req: { user: { userId: string; role: string } }) {
     return this.productsService.remove(id, req.user.userId, req.user.role);
   }
 }

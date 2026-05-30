@@ -34,7 +34,14 @@ export function isAuctionActive(timing: AuctionTiming): boolean {
 export function getAuctionTimeRemaining(
   endsAt: string | Date,
   now: Date = new Date(),
-): { expired: boolean; totalMs: number; days: number; hours: number; minutes: number; seconds: number } {
+): {
+  expired: boolean;
+  totalMs: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+} {
   const end = new Date(endsAt).getTime();
   const totalMs = Math.max(0, end - now.getTime());
   const expired = totalMs <= 0;
@@ -54,10 +61,7 @@ export function formatAuctionCountdown(endsAt: string | Date, now?: Date): strin
   return `${t.seconds} ثانیه`;
 }
 
-export function getAuctionCurrentPrice(
-  startPrice: number,
-  storedCurrent?: number | null,
-): number {
+export function getAuctionCurrentPrice(startPrice: number, storedCurrent?: number | null): number {
   if (storedCurrent != null && storedCurrent > 0) return storedCurrent;
   return startPrice;
 }

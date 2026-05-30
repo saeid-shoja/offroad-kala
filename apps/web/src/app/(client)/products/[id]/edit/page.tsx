@@ -1,19 +1,14 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { api } from '@/lib/api';
-import { useAuth } from '@/stores/auth-store';
-import { useCategories } from '@/stores/categories-store';
-
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { BoostPaymentDialog } from '@/components/form/boost-payment-dialog';
 import { CitySelect } from '@/components/form/city-select';
 import { FormError } from '@/components/form/form-message';
+import { PremiumProductOptions } from '@/components/form/premium-product-options';
+import { PriceInput } from '@/components/form/price-input';
 import { ProductImageUpload } from '@/components/form/product-image-upload';
 import { ProductSituationSelect } from '@/components/form/product-situation-select';
-import { PriceInput } from '@/components/form/price-input';
-import { PremiumProductOptions } from '@/components/form/premium-product-options';
-import { BoostPaymentDialog } from '@/components/form/boost-payment-dialog';
-import type { ProductSituation } from '@/lib/product-utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -26,6 +21,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { api } from '@/lib/api';
+import type { ProductSituation } from '@/lib/product-utils';
+import { useAuth } from '@/stores/auth-store';
+import { useCategories } from '@/stores/categories-store';
 
 export default function EditProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -61,9 +60,7 @@ export default function EditProductPage() {
         setDescription(product.description);
         setPrice(product.price);
         setCategoryId(product.categoryId);
-        setCarBrands(
-          (product.carBrands || []).map((b: { value: string }) => b.value),
-        );
+        setCarBrands((product.carBrands || []).map((b: { value: string }) => b.value));
         setCity(product.city || '');
         setPhone(product.phone || '');
         setHasGuarantee(product.hasGuarantee);
@@ -144,12 +141,7 @@ export default function EditProductPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">عنوان آگهی</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
+              <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
             </div>
 
             <div className="space-y-2">

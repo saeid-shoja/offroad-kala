@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from './generated/client';
 
@@ -45,7 +45,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   $transaction<T>(
-    fn: (tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'>) => Promise<T>,
+    fn: (
+      tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'>,
+    ) => Promise<T>,
   ): Promise<T> {
     return this.client.$transaction(fn);
   }

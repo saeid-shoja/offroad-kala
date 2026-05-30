@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { Gavel, Plus } from 'lucide-react';
-import { api } from '@/lib/api';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { AuctionProductCard } from '@/components/auction/auction-product-card';
 import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
 import { useAuth } from '@/stores/auth-store';
 
 export default function AuctionsPage() {

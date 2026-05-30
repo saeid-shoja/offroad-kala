@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { formatPrice } from '@offroad/shared';
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -37,11 +37,7 @@ export function PriceInput({
     onChange(digits ? Number(digits) : 0);
   };
 
-  const displayValue = focused
-    ? draft
-    : value > 0
-      ? formatPrice(value)
-      : '';
+  const displayValue = focused ? draft : value > 0 ? formatPrice(value) : '';
 
   return (
     <Input

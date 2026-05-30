@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-
-import { api } from '@/lib/api';
+import { useEffect, useState } from 'react';
 import { ProductCard } from '@/components/shop/product-card';
+import { api } from '@/lib/api';
 import { useCategories } from '@/stores/categories-store';
 
 export default function CategoryPage() {
@@ -46,9 +45,7 @@ export default function CategoryPage() {
           ))}
         </div>
       ) : (
-        <p className="text-muted-foreground py-16 text-center">
-          محصولی در این دسته‌بندی یافت نشد
-        </p>
+        <p className="text-muted-foreground py-16 text-center">محصولی در این دسته‌بندی یافت نشد</p>
       )}
     </div>
   );

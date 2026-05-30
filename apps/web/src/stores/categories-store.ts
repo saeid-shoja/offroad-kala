@@ -52,8 +52,7 @@ export const useCategoriesStore = create<CategoriesState>((set) => ({
         loading: false,
       });
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'خطا در بارگذاری دسته‌بندی‌ها';
+      const message = err instanceof Error ? err.message : 'خطا در بارگذاری دسته‌بندی‌ها';
       if (process.env.NODE_ENV === 'development') {
         console.error('[categories]', message);
       }

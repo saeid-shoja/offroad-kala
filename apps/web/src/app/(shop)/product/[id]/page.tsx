@@ -1,18 +1,29 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { api } from '@/lib/api';
-import { useAuth } from '@/stores/auth-store';
 import { formatPrice, timeAgo } from '@offroad/shared';
-import { Shield, TrendingUp, MapPin, Phone, User, ArrowRight, Edit3, Trash2, Package, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  Edit3,
+  MapPin,
+  Package,
+  Phone,
+  Shield,
+  Sparkles,
+  Trash2,
+  TrendingUp,
+  User,
+} from 'lucide-react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { AuctionPanel } from '@/components/auction/auction-panel';
+import { AddToCartButton } from '@/components/cart/add-to-cart-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AddToCartButton } from '@/components/cart/add-to-cart-button';
+import { api } from '@/lib/api';
 import { getSituationLabel } from '@/lib/product-utils';
 import { isPurchasable } from '@/lib/purchasable';
-import { AuctionPanel } from '@/components/auction/auction-panel';
+import { useAuth } from '@/stores/auth-store';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -24,7 +35,11 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    api.products.get(id).then(setProduct).catch(() => { }).finally(() => setLoading(false));
+    api.products
+      .get(id)
+      .then(setProduct)
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) {
@@ -120,8 +135,8 @@ export default function ProductDetailPage() {
               }
             >
               {product.situation === 'IN_STOCK' ||
-                product.type === 'SHOP' ||
-                product.situation === 'USED' ? (
+              product.type === 'SHOP' ||
+              product.situation === 'USED' ? (
                 <Package className="h-3 w-3" />
               ) : (
                 <Sparkles className="h-3 w-3" />
@@ -199,11 +214,7 @@ export default function ProductDetailPage() {
                 </Button>
               </div>
             </div>
-            <AddToCartButton
-              product={product}
-              quantity={quantity}
-              className="w-full"
-            />
+            <AddToCartButton product={product} quantity={quantity} className="w-full" />
             <Button variant="outline" className="w-full" asChild>
               <Link href="/cart">رفتن به سبد خرید</Link>
             </Button>
@@ -218,9 +229,7 @@ export default function ProductDetailPage() {
               </div>
               <div>
                 <p className="font-medium">{product.user.name || 'کاربر'}</p>
-                <p className="text-xs text-gray-500">
-                  {product.user.city || 'موقعیت نامشخص'}
-                </p>
+                <p className="text-xs text-gray-500">{product.user.city || 'موقعیت نامشخص'}</p>
               </div>
             </div>
             {product.phone && (

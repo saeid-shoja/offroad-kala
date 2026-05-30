@@ -1,26 +1,19 @@
 'use client';
 
+import { SITE_NAME_FA } from '@offroad/shared';
+import { LogOut, Menu, PlusCircle, ShoppingBag, User, X } from 'lucide-react';
 import Link from 'next/link';
-import {
-  User,
-  LogOut,
-  PlusCircle,
-  Menu,
-  X,
-  ShoppingBag,
-} from 'lucide-react';
 import { useState } from 'react';
-
-import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
-import { useAuth } from '@/stores/auth-store';
+import { CartNavButton } from '@/components/nav/cart-nav-button';
 import {
   CategoriesNavDropdown,
   CategoriesNavLinks,
 } from '@/components/nav/categories-nav-dropdown';
-import { NavbarSearch } from '@/components/nav/navbar-search';
 import { LocationPicker } from '@/components/nav/location-picker';
-import { CartNavButton } from '@/components/nav/cart-nav-button';
+import { NavbarSearch } from '@/components/nav/navbar-search';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/stores/auth-store';
 
 export function Navbar() {
   const { user, loading, logout } = useAuth();
@@ -33,9 +26,12 @@ export function Navbar() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-4">
-            <Link href="/" className="text-primary flex shrink-0 items-center gap-2 text-xl font-bold">
+            <Link
+              href="/"
+              className="text-primary flex shrink-0 items-center gap-2 text-xl font-bold"
+            >
               <ShoppingBag className="h-6 w-6" />
-              <span className="hidden sm:inline">آفرود شاپ</span>
+              <span className="hidden sm:inline">{SITE_NAME_FA}</span>
             </Link>
             <div className="hidden items-center gap-1 lg:flex">
               <Link

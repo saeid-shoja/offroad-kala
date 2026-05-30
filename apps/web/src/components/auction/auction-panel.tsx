@@ -1,27 +1,19 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import {
-  formatPrice,
-  formatBidIncrementRate,
   formatAuctionCountdown,
+  formatBidIncrementRate,
+  formatPrice,
   getMinimumNextBid,
 } from '@offroad/shared';
-import { Gavel, Clock, Users, TrendingUp, Zap, AlertTriangle } from 'lucide-react';
-
-import { api } from '@/lib/api';
-import { useAuth } from '@/stores/auth-store';
-import { useCart } from '@/stores/cart-store';
-import { getBuyNowPrice, isPurchasable } from '@/lib/purchasable';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PriceInput } from '@/components/form/price-input';
+import { AlertTriangle, Clock, Gavel, TrendingUp, Users, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { FormError } from '@/components/form/form-message';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { PriceInput } from '@/components/form/price-input';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +22,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { api } from '@/lib/api';
+import { getBuyNowPrice, isPurchasable } from '@/lib/purchasable';
+import { useAuth } from '@/stores/auth-store';
+import { useCart } from '@/stores/cart-store';
 
 type AuctionPanelProps = {
   product: {
@@ -69,7 +68,10 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
   const [endedNotice, setEndedNotice] = useState(false);
 
   const loadSummary = useCallback(() => {
-    api.auctions.summary(product.id).then(setSummary).catch(() => setSummary(null));
+    api.auctions
+      .summary(product.id)
+      .then(setSummary)
+      .catch(() => setSummary(null));
   }, [product.id]);
 
   useEffect(() => {
@@ -101,7 +103,8 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
   }, [summary?.userWasOutbid]);
 
   useEffect(() => {
-    const min = summary?.minNextBid ?? getMinimumNextBid(product.auctionCurrentPrice ?? product.price);
+    const min =
+      summary?.minNextBid ?? getMinimumNextBid(product.auctionCurrentPrice ?? product.price);
     setBidAmount(min);
   }, [summary, product.auctionCurrentPrice, product.price]);
 
@@ -170,9 +173,7 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
             <Gavel className="text-violet-600 size-5" />
             مزایده
             <Badge className="bg-violet-600 text-white hover:bg-violet-600">مزایده</Badge>
-            {!active && (
-              <Badge variant="secondary">پایان یافته</Badge>
-            )}
+            {!active && <Badge variant="secondary">پایان یافته</Badge>}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -260,9 +261,7 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
             )}
           </div>
 
-          {success && (
-            <p className="text-sm text-green-600">{success}</p>
-          )}
+          {success && <p className="text-sm text-green-600">{success}</p>}
         </CardContent>
       </Card>
 

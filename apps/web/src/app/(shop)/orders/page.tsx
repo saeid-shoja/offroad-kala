@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { formatPrice } from '@offroad/shared';
 import { Package } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/stores/auth-store';
 import { api } from '@/lib/api';
+import { useAuth } from '@/stores/auth-store';
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'در انتظار',
@@ -67,9 +67,7 @@ export default function OrdersPage() {
           {orders.map((order) => (
             <Card key={order.id}>
               <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  سفارش {order.id.slice(-8)}
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">سفارش {order.id.slice(-8)}</CardTitle>
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="secondary">{STATUS_LABELS[order.status] ?? order.status}</Badge>
                   {order.paymentMethod && (
@@ -80,12 +78,8 @@ export default function OrdersPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
-                <p className="text-primary font-bold">
-                  {formatPrice(order.total)} تومان
-                </p>
-                {order.address && (
-                  <p className="text-muted-foreground">آدرس: {order.address}</p>
-                )}
+                <p className="text-primary font-bold">{formatPrice(order.total)} تومان</p>
+                {order.address && <p className="text-muted-foreground">آدرس: {order.address}</p>}
                 <ul className="space-y-2 border-t pt-3">
                   {order.items?.map((item: any) => (
                     <li key={item.id} className="flex justify-between gap-2">

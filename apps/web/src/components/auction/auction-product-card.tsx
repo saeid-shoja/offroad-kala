@@ -1,12 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-import { formatPrice, formatAuctionCountdown } from '@offroad/shared';
+import { formatAuctionCountdown, formatPrice } from '@offroad/shared';
 import { Clock, Gavel, MapPin, Users } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
 
 type AuctionProductCardProps = {
   product: {
@@ -65,8 +65,7 @@ export function AuctionProductCard({ product }: AuctionProductCardProps) {
             {product.title}
           </h3>
           <p className="text-foreground text-sm font-bold">
-            {formatPrice(currentPrice)}{' '}
-            <span className="text-xs font-normal">تومان</span>
+            {formatPrice(currentPrice)} <span className="text-xs font-normal">تومان</span>
           </p>
           <div className="text-muted-foreground flex flex-col gap-1.5 text-xs">
             <span className="flex items-center gap-1">

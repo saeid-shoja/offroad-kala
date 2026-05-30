@@ -7,11 +7,11 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Carousel,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from '@/components/ui/carousel';
 import { fetchSlides, type Slide } from '@/lib/get-landing-slides';
 import { cn } from '@/lib/utils';
@@ -70,11 +70,7 @@ export function HeroSlider() {
 
   return (
     <section className="relative w-full my-5" aria-label="main slider">
-      <Carousel
-        setApi={setApi}
-        opts={{ loop: true }}
-        className="h-[calc(75svh-3.5rem)] w-full"
-      >
+      <Carousel setApi={setApi} opts={{ loop: true }} className="h-[calc(75svh-3.5rem)] w-full">
         <CarouselContent className="ms-0 h-full">
           {slides.map((slide) => (
             <CarouselItem key={slide.id} className="ps-0">
@@ -100,10 +96,8 @@ export function HeroSlider() {
                     )}
                     {slide.link && (
                       <div className="mt-6">
-                        <Button asChild size="lg" className='w-[250px] rounded-md mr-10'>
-                          <Link href={slide.link}>
-                            {slide.linkLabel ?? 'مشاهده بیشتر'}
-                          </Link>
+                        <Button asChild size="lg" className="w-[250px] rounded-md mr-10">
+                          <Link href={slide.link}>{slide.linkLabel ?? 'مشاهده بیشتر'}</Link>
                         </Button>
                       </div>
                     )}

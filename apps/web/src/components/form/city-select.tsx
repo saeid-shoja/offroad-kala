@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { IRAN_PROVINCES } from '@/lib/iran-locations';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -10,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { IRAN_PROVINCES } from '@/lib/iran-locations';
 
 interface CitySelectProps {
   value: string;
@@ -18,12 +18,7 @@ interface CitySelectProps {
   required?: boolean;
 }
 
-export function CitySelect({
-  value,
-  onChange,
-  label = 'شهر',
-  required,
-}: CitySelectProps) {
+export function CitySelect({ value, onChange, label = 'شهر', required }: CitySelectProps) {
   const [provinceId, setProvinceId] = useState<number | null>(() => {
     if (!value) return null;
     const found = IRAN_PROVINCES.find((p) => p.cities.includes(value));

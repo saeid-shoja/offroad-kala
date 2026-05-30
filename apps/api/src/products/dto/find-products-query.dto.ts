@@ -1,15 +1,7 @@
 import { Transform, Type } from 'class-transformer';
-import {
-  IsArray,
-  IsBoolean,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
-import { Advertiser, ProductSituation } from '../../prisma/generated/client';
+import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
+import { Advertiser, ProductSituation } from '../../prisma/generated/client';
 
 export class FindProductsQueryDto extends PaginationQueryDto {
   @IsOptional()

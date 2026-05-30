@@ -5,8 +5,8 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { isPurchasable, type PurchasableProduct } from '@/lib/purchasable';
-import { useCart } from '@/stores/cart-store';
 import { cn } from '@/lib/utils';
+import { useCart } from '@/stores/cart-store';
 
 type AddToCartButtonProps = {
   product: PurchasableProduct & {

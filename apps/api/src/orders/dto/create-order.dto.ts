@@ -1,12 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsArray,
-  IsEnum,
-  IsOptional,
-  IsString,
-  MinLength,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString, MinLength, ValidateNested } from 'class-validator';
 import { PaymentMethod } from '../../prisma/generated/client';
 import { OrderItemDto } from './order-item.dto';
 

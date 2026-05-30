@@ -28,7 +28,10 @@ export function BoostPaymentDialog({
 }: BoostPaymentDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => loading && e.preventDefault()}>
+      <DialogContent
+        className="sm:max-w-md"
+        onPointerDownOutside={(e) => loading && e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="size-5 text-amber-600" />
@@ -36,11 +39,10 @@ export function BoostPaymentDialog({
           </DialogTitle>
           <DialogDescription asChild>
             <div className="text-foreground space-y-3 pt-2 text-start text-sm">
-              <p>
-                برای ثبت آگهی با وضعیت «پله شده»، مبلغ زیر را پرداخت کنید:
-              </p>
+              <p>برای ثبت آگهی با وضعیت «پله شده»، مبلغ زیر را پرداخت کنید:</p>
               <p className="text-primary text-2xl font-bold">
-                {formatPrice(BOOST_LISTING_FEE)} <span className="text-muted-foreground text-base font-normal">تومان</span>
+                {formatPrice(BOOST_LISTING_FEE)}{' '}
+                <span className="text-muted-foreground text-base font-normal">تومان</span>
               </p>
               <p className="text-muted-foreground text-xs">
                 پرداخت شبیه‌سازی‌شده است. پس از تأیید، آگهی شما ثبت می‌شود.

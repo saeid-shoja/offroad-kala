@@ -1,5 +1,6 @@
+import { SITE_EMAIL, SITE_NAME_FA } from '@offroad/shared';
+import { Mail, MapPin, Phone, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { ShoppingBag, Phone, Mail, MapPin } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const shopLinks = [
@@ -58,7 +59,7 @@ export function SiteFooter() {
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
             <Link href="/" className="text-primary flex items-center gap-2 text-lg font-bold">
               <ShoppingBag className="h-5 w-5" />
-              آفرود شاپ
+              {SITE_NAME_FA}
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
               خرید و فروش لوازم آفرود، قطعات یدکی و تجهیزات آفرودی دست دوم و مزایده ای.
@@ -70,7 +71,7 @@ export function SiteFooter() {
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0" />
-                info@offroadshop.ir
+                {SITE_EMAIL}
               </p>
               <p className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 shrink-0" />
@@ -87,7 +88,9 @@ export function SiteFooter() {
         <Separator className="my-8" />
 
         <div className="text-muted-foreground flex flex-col items-center justify-between gap-2 text-center text-xs sm:flex-row sm:text-sm">
-          <p>© {new Date().getFullYear()} آفرود شاپ — تمامی حقوق محفوظ است.</p>
+          <p>
+            © {new Date().getFullYear()} {SITE_NAME_FA} — تمامی حقوق محفوظ است.
+          </p>
           <p>طراحی شده برای علاقه‌مندان آفرود و آفرودی‌ها</p>
         </div>
       </div>

@@ -2,12 +2,7 @@
 
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
-import {
-  CART_STORAGE_KEY,
-  cartItemCount,
-  cartSubtotal,
-  type CartItem,
-} from '@/lib/cart-types';
+import { CART_STORAGE_KEY, type CartItem, cartItemCount, cartSubtotal } from '@/lib/cart-types';
 
 type AddToCartInput = {
   productId: string;
@@ -57,9 +52,7 @@ export const useCartStore = create<CartState>()(
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productId === input.productId
-                  ? { ...i, quantity: i.quantity + qty }
-                  : i,
+                i.productId === input.productId ? { ...i, quantity: i.quantity + qty } : i,
               ),
             };
           }
@@ -91,9 +84,7 @@ export const useCartStore = create<CartState>()(
           return;
         }
         set((state) => ({
-          items: state.items.map((i) =>
-            i.productId === productId ? { ...i, quantity } : i,
-          ),
+          items: state.items.map((i) => (i.productId === productId ? { ...i, quantity } : i)),
         }));
       },
 

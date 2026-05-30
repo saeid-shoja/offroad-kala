@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
-import { Minus, Plus, Trash2 } from 'lucide-react';
 import { formatPrice } from '@offroad/shared';
+import { Minus, Plus, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import type { CartItem } from '@/lib/cart-types';
@@ -29,7 +29,10 @@ export function CartLineItem({ item }: { item: CartItem }) {
 
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
         <div className="flex items-start justify-between gap-2">
-          <Link href={`/product/${item.productId}`} className="line-clamp-2 text-sm font-medium hover:text-primary">
+          <Link
+            href={`/product/${item.productId}`}
+            className="line-clamp-2 text-sm font-medium hover:text-primary"
+          >
             {item.title}
           </Link>
           <Button
@@ -71,11 +74,10 @@ export function CartLineItem({ item }: { item: CartItem }) {
 
           <div className="text-end">
             <p className="text-primary text-sm font-bold">
-              {formatPrice(lineTotal)} <span className="text-muted-foreground text-xs font-normal">تومان</span>
+              {formatPrice(lineTotal)}{' '}
+              <span className="text-muted-foreground text-xs font-normal">تومان</span>
             </p>
-            <p className="text-muted-foreground text-xs">
-              واحد: {formatPrice(item.price)} تومان
-            </p>
+            <p className="text-muted-foreground text-xs">واحد: {formatPrice(item.price)} تومان</p>
           </div>
         </div>
       </div>

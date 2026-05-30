@@ -1,15 +1,15 @@
 'use client';
 
 import { Gavel } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { PriceInput } from '@/components/form/price-input';
 import {
   DateTimePicker,
   dateTimeLocalToIso,
   defaultMinDateTimeLocal,
 } from '@/components/form/datetime-picker';
+import { PriceInput } from '@/components/form/price-input';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 export type AuctionListingFields = {
   isAuction: boolean;
@@ -41,7 +41,10 @@ export function AuctionListingOptions({ value, onChange }: AuctionListingOptions
             }
           />
           <div className="space-y-0.5">
-            <Label htmlFor="is-auction" className="flex cursor-pointer items-center gap-2 text-base font-semibold">
+            <Label
+              htmlFor="is-auction"
+              className="flex cursor-pointer items-center gap-2 text-base font-semibold"
+            >
               <Gavel className="text-violet-600 size-5" />
               ثبت به‌صورت مزایده
             </Label>
@@ -72,7 +75,9 @@ export function AuctionListingOptions({ value, onChange }: AuctionListingOptions
                 onChange={(v) => onChange({ buyNowPrice: v })}
                 required
               />
-              <p className="text-muted-foreground text-xs">خریدار می‌تواند بدون شرکت در مزایده بخرد</p>
+              <p className="text-muted-foreground text-xs">
+                خریدار می‌تواند بدون شرکت در مزایده بخرد
+              </p>
             </div>
           </div>
 

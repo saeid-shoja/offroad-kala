@@ -1,21 +1,25 @@
 'use client';
 
+import { AlertCircle, Gavel, PackageSearch, Shield, Store, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
-import { ProductCard } from '@/components/shop/product-card';
-import { CategoryCard } from '@/components/shop/category-card';
-import { useCategories } from '@/stores/categories-store';
-import { Store, PackageSearch, TrendingUp, Shield, AlertCircle, Gavel } from 'lucide-react';
 import { AuctionProductCard } from '@/components/auction/auction-product-card';
+import { CategoryCard } from '@/components/shop/category-card';
+import { ProductCard } from '@/components/shop/product-card';
 import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
+import { useCategories } from '@/stores/categories-store';
 
 export default function MainSection() {
   const [shopProducts, setShopProducts] = useState<any[]>([]);
   const [clientProducts, setClientProducts] = useState<any[]>([]);
   const [auctionProducts, setAuctionProducts] = useState<any[]>([]);
-  const { parts: categories, loading: categoriesLoading, error: categoriesError, refetch } =
-    useCategories();
+  const {
+    parts: categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+    refetch,
+  } = useCategories();
 
   useEffect(() => {
     api.products
@@ -64,13 +68,16 @@ export default function MainSection() {
         </div>
       </section>
 
-      <section className='bg-border/30 p-5 my-5 w-full'>
+      <section className="bg-border/30 p-5 my-5 w-full">
         <div className="mb-5 flex items-center justify-between container">
           <h2 className="flex items-center gap-2 text-xl font-bold">
             <Store className="text-primary h-6 w-6" />
             محصولات فروشگاه
           </h2>
-          <Link href="/products?advertiserType=SHOP" className="text-primary text-sm hover:underline">
+          <Link
+            href="/products?advertiserType=SHOP"
+            className="text-primary text-sm hover:underline"
+          >
             مشاهده همه
           </Link>
         </div>
@@ -91,7 +98,10 @@ export default function MainSection() {
             <Gavel className="text-violet-600 h-6 w-6" />
             مزایده‌ها
           </h2>
-          <Link href="/products?advertiserType=AUCTION" className="text-primary text-sm hover:underline">
+          <Link
+            href="/products?advertiserType=AUCTION"
+            className="text-primary text-sm hover:underline"
+          >
             مشاهده همه
           </Link>
         </div>
@@ -129,7 +139,7 @@ export default function MainSection() {
         )}
       </section>
 
-      <section className='container'>
+      <section className="container">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold">دسته‌بندی محصولات</h2>
           <Link href="/categories" className="text-primary text-sm hover:underline">

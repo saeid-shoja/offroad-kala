@@ -1,29 +1,19 @@
 'use client';
 
+import { ChevronDown, MapPin, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { MapPin, ChevronDown, X } from 'lucide-react';
-
-import { IRAN_PROVINCES } from '@/lib/iran-locations';
-import { useLocationFilter } from '@/stores/location-store';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { IRAN_PROVINCES } from '@/lib/iran-locations';
+import { useLocationFilter } from '@/stores/location-store';
 
 export function LocationPicker() {
-  const { selectedCities, toggleCity, clearCities, hasFilter } =
-    useLocationFilter();
+  const { selectedCities, toggleCity, clearCities, hasFilter } = useLocationFilter();
   const [open, setOpen] = useState(false);
   const [expandedProvince, setExpandedProvince] = useState<number | null>(null);
 
@@ -46,9 +36,7 @@ export function LocationPicker() {
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div>
             <p className="text-sm font-semibold">موقعیت مکانی</p>
-            <p className="text-muted-foreground text-xs">
-              استان و شهر — چند شهر انتخاب کنید
-            </p>
+            <p className="text-muted-foreground text-xs">استان و شهر — چند شهر انتخاب کنید</p>
           </div>
           {hasFilter && (
             <Button variant="ghost" size="icon" onClick={clearCities} aria-label="پاک کردن">
@@ -79,9 +67,7 @@ export function LocationPicker() {
               <Collapsible
                 key={province.id}
                 open={expandedProvince === province.id}
-                onOpenChange={(isOpen) =>
-                  setExpandedProvince(isOpen ? province.id : null)
-                }
+                onOpenChange={(isOpen) => setExpandedProvince(isOpen ? province.id : null)}
               >
                 <CollapsibleTrigger asChild>
                   <button
@@ -90,8 +76,9 @@ export function LocationPicker() {
                   >
                     {province.name}
                     <ChevronDown
-                      className={`h-4 w-4 opacity-60 transition-transform ${expandedProvince === province.id ? 'rotate-180' : ''
-                        }`}
+                      className={`h-4 w-4 opacity-60 transition-transform ${
+                        expandedProvince === province.id ? 'rotate-180' : ''
+                      }`}
                     />
                   </button>
                 </CollapsibleTrigger>
@@ -105,9 +92,7 @@ export function LocationPicker() {
                         checked={selectedCities.includes(city)}
                         onCheckedChange={() => toggleCity(city)}
                       />
-                      <Label className="cursor-pointer text-sm font-normal">
-                        {city}
-                      </Label>
+                      <Label className="cursor-pointer text-sm font-normal">{city}</Label>
                     </label>
                   ))}
                 </CollapsibleContent>
