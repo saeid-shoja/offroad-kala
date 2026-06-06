@@ -23,7 +23,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: 'خطا در ارتباط با سرور' }));
-    throw new Error(error.message || `HTTP ${res.status}`);
+    const message = Array.isArray(error.message)
+      ? error.message[0]
+      : error.message || `HTTP ${res.status}`;
+    throw new Error(message);
   }
 
   return res.json();
@@ -31,13 +34,24 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const api = {
   auth: {
-    register: (data: { phone: string; name: string; password: string; city?: string }) =>
+    register: (data: {
+      phone: string;
+      email: string;
+      name: string;
+      password: string;
+      city?: string;
+    }) =>
       request<{ token: string; user: any }>('/auth/register', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
     login: (data: { phone: string; password: string }) =>
       request<{ token: string; user: any }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    forgotPassword: (data: { email: string }) =>
+      request<{ message: string }>('/auth/forgot-password', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
@@ -118,6 +132,22 @@ export const api = {
     products: () => request<any[]>('/users/products'),
     updateProfile: (data: any) =>
       request<any>('/users/profile', { method: 'PATCH', body: JSON.stringify(data) }),
+    messages: () => request<any[]>('/users/messages'),
+    messagesUnreadCount: () => request<{ count: number }>('/users/messages/unread-count'),
+    markMessageRead: (id: string) =>
+      request<any>(`/users/messages/${id}/read`, { method: 'PATCH' }),
+    markAllMessagesRead: () =>
+      request<{ updated: number }>('/users/messages/read-all', { method: 'PATCH' }),
+    favoriteIds: () => request<{ productIds: string[] }>('/users/favorites/ids'),
+    favorites: () => request<any[]>('/users/favorites'),
+    addFavorite: (productId: string) =>
+      request<{ productId: string; favorited: boolean }>(`/users/favorites/${productId}`, {
+        method: 'POST',
+      }),
+    removeFavorite: (productId: string) =>
+      request<{ productId: string; favorited: boolean }>(`/users/favorites/${productId}`, {
+        method: 'DELETE',
+      }),
   },
 
   auctions: {

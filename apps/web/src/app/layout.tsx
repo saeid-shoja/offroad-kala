@@ -5,6 +5,7 @@ import localFont from 'next/font/local';
 import { SiteFooter } from '@/components/layout/footer';
 import { Navbar } from '@/components/layout/navbar';
 import { cn } from '@/lib/utils';
+import { FavoritesSync } from '@/providers/favorites-sync';
 import { StoreInitializer } from '@/providers/store-initializer';
 import { ThemeProvider } from '@/providers/theme-provider';
 
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <ThemeProvider>
           <StoreInitializer />
+          <FavoritesSync />
           <Navbar />
           <main className="mx-auto min-h-[calc(100vh-5rem)] w-full flex-1 py-6">{children}</main>
           <SiteFooter />

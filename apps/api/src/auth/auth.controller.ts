@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Post, Request } from '@nestjs/common';
-import type { AuthService } from './auth.service';
+import { AuthService } from './auth.service';
 import { Public } from './custom.decorator';
-import type { LoginDto, RegisterDto } from './dto';
+import { ForgotPasswordDto, LoginDto, RegisterDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Public()
   @Post('register')
@@ -17,6 +17,12 @@ export class AuthController {
   @Post('login')
   login(@Body() body: LoginDto) {
     return this.authService.login(body);
+  }
+
+  @Public()
+  @Post('forgot-password')
+  forgotPassword(@Body() body: ForgotPasswordDto) {
+    return this.authService.forgotPassword(body);
   }
 
   @Get('profile')

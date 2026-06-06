@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 export type User = {
   id: string;
   phone: string;
+  email?: string | null;
   name: string;
   role: string;
   city?: string;
@@ -17,7 +18,7 @@ type AuthState = {
   hydrated: boolean;
   hydrate: () => Promise<void>;
   login: (phone: string, password: string) => Promise<void>;
-  register: (phone: string, name: string, password: string, city?: string) => Promise<void>;
+  register: (phone: string, name: string, password: string, email: string, city?: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -47,8 +48,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user: res.user });
   },
 
-  register: async (phone, name, password, city) => {
-    const res = await api.auth.register({ phone, name, password, city });
+  register: async (phone, name, password, email, city) => {
+    const res = await api.auth.register({ phone, name, password, email, city });
     localStorage.setItem('token', res.token);
     set({ user: res.user });
   },

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { getAuctionCurrentPrice, getMinimumNextBid, isAuctionActive } from '../common/auction';
-import type { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import type { PlaceBidDto } from './dto';
 
 @Injectable()
@@ -32,6 +32,9 @@ export class AuctionsService {
 
     let userHighestBid: number | null = null;
     let userWasOutbid = false;
+    let userIsTopBidder = false;
+
+    const topBid = product.auctionBids[0];
 
     if (userId) {
       const userBid = await this.prisma.auctionBid.findFirst({
@@ -40,10 +43,10 @@ export class AuctionsService {
       });
       if (userBid) {
         userHighestBid = userBid.amount;
-        const topBid = product.auctionBids[0];
         userWasOutbid =
           active && topBid != null && topBid.userId !== userId && userBid.amount < topBid.amount;
       }
+      userIsTopBidder = active && topBid != null && topBid.userId === userId;
     }
 
     return {
@@ -61,7 +64,8 @@ export class AuctionsService {
       ended: !active,
       userHighestBid,
       userWasOutbid,
-      latestBidAt: product.auctionBids[0]?.createdAt ?? null,
+      userIsTopBidder,
+      latestBidAt: topBid?.createdAt ?? null,
     };
   }
 
@@ -99,6 +103,13 @@ export class AuctionsService {
     }
 
     const previousTop = product.auctionBids[0];
+
+    if (previousTop?.userId === userId) {
+      throw new BadRequestException(
+        'شما در حال حاضر بالاترین پیشنهاد را دارید و نمی‌توانید پیشنهاد بالاتری ثبت کنید',
+      );
+    }
+
     const outbidUserId = previousTop && previousTop.userId !== userId ? previousTop.userId : null;
 
     const bid = await this.prisma.$transaction(async (tx) => {

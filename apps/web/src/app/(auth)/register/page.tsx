@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const { register } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [city, setCity] = useState('');
@@ -26,7 +27,7 @@ export default function RegisterPage() {
     setError('');
     setLoading(true);
     try {
-      await register(phone, name, password, city);
+      await register(phone, name, password, email, city);
       router.push('/');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'خطا در ثبت نام');
@@ -51,6 +52,19 @@ export default function RegisterPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">ایمیل</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                dir="ltr"
+                className="text-end"
                 required
               />
             </div>

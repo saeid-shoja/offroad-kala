@@ -4,11 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { CategoriesService } from '../categories/categories.service';
 import { getAuctionCurrentPrice, isAuctionActive } from '../common/auction';
-import { getCarBrandLabel, parseCarBrands } from '../common/car-brands';
 import { isPurchasableProduct } from '../common/purchasable';
-import type { Advertiser, CarBrand, ProductSituation } from '../prisma/generated/client';
-import type { PrismaService } from '../prisma/prisma.service';
+import type { Advertiser, ProductSituation } from '../prisma/generated/client';
+import { PrismaService } from '../prisma/prisma.service';
 import type { CreateProductDto, UpdateProductDto } from './dto';
 
 const productInclude = {
@@ -27,7 +27,10 @@ const productIncludeDetail = {
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private categoriesService: CategoriesService,
+  ) { }
 
   private postedSince(postedWithin: string): Date | null {
     const now = Date.now();
@@ -41,10 +44,10 @@ export class ProductsService {
     return new Date(now - h * 60 * 60 * 1000);
   }
 
-  mapProduct<
+  async mapProduct<
     T extends {
       images: string;
-      carBrands?: { brand: CarBrand }[];
+      carBrands?: { brandCode: string }[];
       advertiser: Advertiser;
       hasGuarantee: boolean;
       status: string;
@@ -60,7 +63,8 @@ export class ProductsService {
       _count?: { auctionBids: number };
     },
   >(product: T) {
-    const brands = product.carBrands?.map((row) => row.brand) ?? [];
+    const brandLabels = await this.categoriesService.getCarBrandLabelMap();
+    const brands = product.carBrands?.map((row) => row.brandCode) ?? [];
     const isAuction = Boolean(product.isAuction);
     const startPrice = product.auctionStartPrice ?? product.price;
     const currentPrice = isAuction
@@ -77,7 +81,7 @@ export class ProductsService {
       images: JSON.parse(product.images),
       carBrands: brands.map((brand) => ({
         value: brand,
-        label: getCarBrandLabel(brand),
+        label: brandLabels.get(brand) ?? brand,
       })),
       situation: product.advertiser === 'SHOP' ? 'IN_STOCK' : (product.situation ?? null),
       /** @deprecated use advertiser — kept for existing web clients */
@@ -158,9 +162,9 @@ export class ProductsService {
       where.city = params.city;
     }
     if (params.carBrand) {
-      const brands = parseCarBrands([params.carBrand]);
+      const brands = await this.categoriesService.parseCarBrandCodes([params.carBrand]);
       if (brands.length) {
-        where.carBrands = { some: { brand: brands[0] } };
+        where.carBrands = { some: { brandCode: brands[0] } };
       }
     }
     if (params.search) {
@@ -220,7 +224,7 @@ export class ProductsService {
     ]);
 
     return {
-      products: products.map((p) => this.mapProduct(p)),
+      products: await Promise.all(products.map((p) => this.mapProduct(p))),
       total,
       page,
       totalPages: Math.ceil(total / limit),
@@ -268,7 +272,7 @@ export class ProductsService {
   }
 
   async create(data: CreateProductDto, userId?: string) {
-    const brands = parseCarBrands(data.carBrands);
+    const brands = await this.categoriesService.parseCarBrandCodes(data.carBrands);
     const auctionData = this.buildAuctionCreateData(data);
     const listingPrice = data.isAuction ? (data.auctionStartPrice ?? data.price) : data.price;
 
@@ -287,7 +291,9 @@ export class ProductsService {
         situation: data.situation,
         userId: userId || null,
         ...auctionData,
-        carBrands: brands.length ? { create: brands.map((brand) => ({ brand })) } : undefined,
+        carBrands: brands.length
+          ? { create: brands.map((brandCode) => ({ brandCode })) }
+          : undefined,
       },
       include: productIncludeDetail,
     });
@@ -315,11 +321,11 @@ export class ProductsService {
     }
 
     if (data.carBrands !== undefined) {
-      const brands = parseCarBrands(data.carBrands);
+      const brands = await this.categoriesService.parseCarBrandCodes(data.carBrands);
       await this.prisma.productCarBrand.deleteMany({ where: { productId: id } });
       if (brands.length > 0) {
         updateData.carBrands = {
-          create: brands.map((brand) => ({ brand })),
+          create: brands.map((brandCode) => ({ brandCode })),
         };
       }
     }

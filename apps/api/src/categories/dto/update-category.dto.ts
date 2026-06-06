@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, MinLength } from 'class-validator';
+import { CategoryGroup } from '../../prisma/generated/client';
 
 export class UpdateCategoryDto {
   @IsOptional()
@@ -17,7 +18,19 @@ export class UpdateCategoryDto {
   parentId?: string | null;
 
   @IsOptional()
+  @IsString()
+  libraryId?: string | null;
+
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   sortOrder?: number;
+
+  @IsOptional()
+  @IsEnum(CategoryGroup, { message: 'گروه دسته‌بندی نامعتبر است' })
+  group?: CategoryGroup;
+
+  @IsOptional()
+  @IsString()
+  brandCode?: string | null;
 }

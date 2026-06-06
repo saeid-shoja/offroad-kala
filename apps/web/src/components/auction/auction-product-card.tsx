@@ -5,6 +5,7 @@ import { Clock, Gavel, MapPin, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { FavoriteButton } from '@/components/shop/favorite-button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -40,6 +41,9 @@ export function AuctionProductCard({ product }: AuctionProductCardProps) {
     <Card className="hover:border-violet-400/50 flex h-full flex-col gap-0 overflow-hidden border-violet-200/40 py-0 transition-all hover:shadow-lg">
       <Link href={`/product/${product.id}`} className="group block">
         <div className="relative aspect-square overflow-hidden bg-muted">
+          <div className="absolute top-2 left-2 z-10">
+            <FavoriteButton productId={product.id} />
+          </div>
           {firstImage ? (
             <Image
               width={100}

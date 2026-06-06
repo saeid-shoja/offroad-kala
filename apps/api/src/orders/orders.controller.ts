@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Request } from '@nestjs/common';
 import { Public, Roles } from '../auth/custom.decorator';
-import type { CreateOrderDto, PreviewOrderDto, UpdateOrderStatusDto } from './dto';
-import type { OrdersService } from './orders.service';
+import { CreateOrderDto, PreviewOrderDto, UpdateOrderStatusDto } from './dto';
+import { OrdersService } from './orders.service';
 
 @Controller('orders')
 export class OrdersController {

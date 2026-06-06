@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AuctionProductCard } from '@/components/auction/auction-product-card';
 import { AddToCartButton } from '@/components/cart/add-to-cart-button';
+import { FavoriteButton } from '@/components/shop/favorite-button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { getSituationLabel, type ProductSituation } from '@/lib/product-utils';
@@ -49,6 +50,9 @@ export function ProductCard({ product }: ProductCardProps) {
     <Card className="hover:border-primary/40 flex h-full flex-col gap-0 overflow-hidden py-0 transition-all hover:shadow-lg hover:scale-102">
       <Link href={`/product/${product.id}`} className="group block">
         <div className="relative aspect-square overflow-hidden bg-muted">
+          <div className="absolute top-2 left-2 z-10">
+            <FavoriteButton productId={product.id} />
+          </div>
           <Image
             width={100}
             height={100}

@@ -19,10 +19,10 @@ const accountLinks = [
 ];
 
 const infoLinks = [
+  { href: '/about-us', label: 'درباره ما' },
+  { href: '/roles', label: 'قوانین وب‌سایت و کسب‌وکار' },
+  { href: '/faq', label: 'سوالات پرتکرار' },
   { href: '/products', label: 'جستجوی محصول' },
-  { href: '/categories', label: 'دسته بندی ها' },
-  { href: '#', label: 'قوانین و مقررات' },
-  { href: '#', label: 'تماس با ما' },
 ];
 
 function FooterColumn({

@@ -11,7 +11,15 @@ import { Global, Module } from '@nestjs/common';
       provide: 'JWT_EXPIRES_IN',
       useValue: process.env.JWT_EXPIRES_IN || '7d',
     },
+    {
+      provide: 'RESEND_API_KEY',
+      useValue: process.env.RESEND_API_KEY || '',
+    },
+    {
+      provide: 'MAIL_FROM',
+      useValue: process.env.MAIL_FROM || 'Charkham <onboarding@resend.dev>',
+    },
   ],
-  exports: ['JWT_SECRET', 'JWT_EXPIRES_IN'],
+  exports: ['JWT_SECRET', 'JWT_EXPIRES_IN', 'RESEND_API_KEY', 'MAIL_FROM'],
 })
 export class ConfigModule {}

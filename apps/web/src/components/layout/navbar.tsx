@@ -10,6 +10,7 @@ import {
   CategoriesNavLinks,
 } from '@/components/nav/categories-nav-dropdown';
 import { LocationPicker } from '@/components/nav/location-picker';
+import { MessagesMobileLink, MessagesNavButton } from '@/components/nav/messages-nav-button';
 import { NavbarSearch } from '@/components/nav/navbar-search';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
@@ -65,6 +66,7 @@ export function Navbar() {
                     <PlusCircle className="h-5 w-5" />
                   </Link>
                 </Button>
+                <MessagesNavButton />
                 <Button variant="outline" asChild>
                   <Link href="/dashboard">
                     <User className="h-5 w-5" />
@@ -143,6 +145,7 @@ export function Navbar() {
                 >
                   پنل کاربری
                 </Link>
+                <MessagesMobileLink onNavigate={closeMenu} />
                 <button
                   onClick={() => {
                     logout();

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { getProductSalePrice, isPurchasableProduct } from '../common/purchasable';
 import type { OrderStatus } from '../prisma/generated/client';
-import type { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import type { CreateOrderDto, OrderItemDto, PreviewOrderDto } from './dto';
 
 type ResolvedLine = {

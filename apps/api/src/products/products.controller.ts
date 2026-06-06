@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request } from '@nestjs/common';
 import { Public } from '../auth/custom.decorator';
-import type { CreateProductDto, FindProductsQueryDto, UpdateProductDto } from './dto';
-import type { ProductsService } from './products.service';
+import { CreateProductDto, FindProductsQueryDto, UpdateProductDto } from './dto';
+import { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController {

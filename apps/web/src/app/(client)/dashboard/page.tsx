@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, MapPin, PackageSearch, Phone, ShoppingBag, User } from 'lucide-react';
+import { Heart, LogOut, Mail, MapPin, PackageSearch, Phone, ShoppingBag, User } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -81,6 +81,20 @@ export default function DashboardPage() {
           آگهی‌های من
         </h2>
         <div className="flex gap-2">
+          <Link
+            href="/favorites"
+            className="flex items-center gap-1 rounded-sm border px-4 py-2 text-sm hover:bg-gray-50"
+          >
+            <Heart className="h-4 w-4" />
+            علاقه‌مندی‌ها
+          </Link>
+          <Link
+            href="/messages"
+            className="flex items-center gap-1 rounded-sm border px-4 py-2 text-sm hover:bg-gray-50"
+          >
+            <Mail className="h-4 w-4" />
+            پیام‌ها
+          </Link>
           <Link
             href="/orders"
             className="flex items-center gap-1 rounded-sm border px-4 py-2 text-sm hover:bg-gray-50"

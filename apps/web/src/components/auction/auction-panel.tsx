@@ -113,6 +113,8 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
   const bidCount = summary?.bidCount ?? product.bidCount ?? 0;
   const active = summary?.active ?? product.auctionActive;
   const canBuyNow = isPurchasable(product);
+  const userIsTopBidder = summary?.userIsTopBidder === true;
+  const canPlaceBid = active && !userIsTopBidder;
 
   const openBidFlow = () => {
     if (!user) {
@@ -177,7 +179,17 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {outbidNotice && active && (
+          {userIsTopBidder && active && (
+            <div className="flex items-start gap-2 rounded-lg border border-green-300 bg-green-50 p-3 text-sm text-green-900 dark:bg-green-950/40 dark:text-green-100">
+              <Gavel className="mt-0.5 size-4 shrink-0" />
+              <p>
+                شما بالاترین پیشنهاد ({formatPrice(currentPrice)} تومان) را دارید. تا زمانی که
+                پیشنهاد بالاتری ثبت نشود، امکان ثبت پیشنهاد جدید ندارید.
+              </p>
+            </div>
+          )}
+
+          {outbidNotice && active && !userIsTopBidder && (
             <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
               <p>
@@ -242,7 +254,7 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
           )}
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            {active && (
+            {canPlaceBid && (
               <Button type="button" className="flex-1 gap-2" onClick={openBidFlow}>
                 <Gavel className="size-4" />
                 ثبت پیشنهاد جدید

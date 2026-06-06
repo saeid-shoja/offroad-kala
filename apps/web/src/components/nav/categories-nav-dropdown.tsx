@@ -243,9 +243,8 @@ function MobileLibrarySection({
   onNavigate?: () => void;
 }) {
   const isFlat =
-    library.kind === 'CAR_BRAND' ||
-    (library.slug === MOTORCYCLE_ATV_SLUG &&
-      library.children.every((c) => c.children.length === 0));
+    library.children.every((c) => c.children.length === 0) &&
+    (library.kind === 'CAR_BRAND' || library.slug === MOTORCYCLE_ATV_SLUG);
 
   return (
     <Collapsible className="mb-1 w-full">

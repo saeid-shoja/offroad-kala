@@ -1,7 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { Public, Roles } from '../auth/custom.decorator';
-import type { CategoriesService } from './categories.service';
-import type { CreateCategoryDto, UpdateCategoryDto } from './dto';
+import { CategoriesService } from './categories.service';
+import {
+  CreateCategoryDto,
+  CreateLibraryDto,
+  UpdateCategoryDto,
+  UpdateLibraryDto,
+} from './dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -36,10 +41,27 @@ export class CategoriesController {
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(id);
   }
+}
+
+@Controller('libraries')
+export class LibrariesController {
+  constructor(private categoriesService: CategoriesService) {}
 
   @Roles('ADMIN')
-  @Post('seed')
-  seed() {
-    return this.categoriesService.seed();
+  @Post()
+  create(@Body() body: CreateLibraryDto) {
+    return this.categoriesService.createLibrary(body);
+  }
+
+  @Roles('ADMIN')
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() body: UpdateLibraryDto) {
+    return this.categoriesService.updateLibrary(id, body);
+  }
+
+  @Roles('ADMIN')
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.categoriesService.removeLibrary(id);
   }
 }

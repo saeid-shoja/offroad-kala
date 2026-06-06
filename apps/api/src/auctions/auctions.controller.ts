@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Request } from '@nestjs/common';
 import { Public } from '../auth/custom.decorator';
-import type { AuctionsService } from './auctions.service';
-import type { PlaceBidDto } from './dto';
+import { AuctionsService } from './auctions.service';
+import { PlaceBidDto } from './dto';
 
 @Controller('auctions')
 export class AuctionsController {

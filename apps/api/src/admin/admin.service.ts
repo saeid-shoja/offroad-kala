@@ -1,6 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import type { Advertiser, ProductStatus } from '../prisma/generated/client';
-import type { PrismaService } from '../prisma/prisma.service';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
+import type { Advertiser, ProductStatus, UserRole } from '../prisma/generated/client';
+import { PrismaService } from '../prisma/prisma.service';
+import type { CreateAdminUserDto, UpdateAdminUserDto } from './dto';
 
 @Injectable()
 export class AdminService {
@@ -41,9 +48,121 @@ export class AdminService {
 
   async getAllUsers() {
     return this.prisma.user.findMany({
-      select: { id: true, phone: true, name: true, role: true, city: true, createdAt: true },
+      select: {
+        id: true,
+        phone: true,
+        email: true,
+        name: true,
+        role: true,
+        city: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async createUser(data: CreateAdminUserDto) {
+    const existingPhone = await this.prisma.user.findUnique({ where: { phone: data.phone } });
+    if (existingPhone) {
+      throw new ConflictException('این شماره موبایل قبلاً ثبت شده است');
+    }
+
+    const existingEmail = await this.prisma.user.findUnique({
+      where: { email: data.email.toLowerCase() },
+    });
+    if (existingEmail) {
+      throw new ConflictException('این ایمیل قبلاً ثبت شده است');
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 12);
+
+    return this.prisma.user.create({
+      data: {
+        phone: data.phone,
+        email: data.email.toLowerCase(),
+        name: data.name,
+        password: hashedPassword,
+        city: data.city,
+        role: data.role ?? 'CLIENT',
+      },
+      select: {
+        id: true,
+        phone: true,
+        email: true,
+        name: true,
+        role: true,
+        city: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async updateUser(id: string, data: UpdateAdminUserDto) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('کاربر یافت نشد');
+
+    if (data.phone && data.phone !== user.phone) {
+      const existing = await this.prisma.user.findUnique({ where: { phone: data.phone } });
+      if (existing) throw new ConflictException('این شماره موبایل قبلاً ثبت شده است');
+    }
+
+    if (data.email && data.email.toLowerCase() !== user.email) {
+      const existing = await this.prisma.user.findUnique({
+        where: { email: data.email.toLowerCase() },
+      });
+      if (existing) throw new ConflictException('این ایمیل قبلاً ثبت شده است');
+    }
+
+    if (data.role === 'CLIENT' && user.role === 'ADMIN') {
+      const adminCount = await this.prisma.user.count({ where: { role: 'ADMIN' } });
+      if (adminCount <= 1) {
+        throw new BadRequestException('حداقل یک مدیر باید در سیستم باقی بماند');
+      }
+    }
+
+    const updateData: {
+      phone?: string;
+      email?: string;
+      name?: string;
+      city?: string | null;
+      role?: UserRole;
+      password?: string;
+    } = {};
+
+    if (data.phone) updateData.phone = data.phone;
+    if (data.email) updateData.email = data.email.toLowerCase();
+    if (data.name) updateData.name = data.name;
+    if (data.city !== undefined) updateData.city = data.city;
+    if (data.role) updateData.role = data.role;
+    if (data.password) updateData.password = await bcrypt.hash(data.password, 12);
+
+    return this.prisma.user.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        phone: true,
+        email: true,
+        name: true,
+        role: true,
+        city: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async deleteUser(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('کاربر یافت نشد');
+
+    if (user.role === 'ADMIN') {
+      const adminCount = await this.prisma.user.count({ where: { role: 'ADMIN' } });
+      if (adminCount <= 1) {
+        throw new BadRequestException('حداقل یک مدیر باید در سیستم باقی بماند');
+      }
+    }
+
+    return this.prisma.user.delete({ where: { id } });
   }
 
   async getAllProducts(params: {
