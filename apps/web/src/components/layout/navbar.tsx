@@ -1,9 +1,9 @@
 'use client';
 
-import { SITE_NAME_FA } from '@offroad/shared';
-import { LogOut, Menu, PlusCircle, ShoppingBag, User, X } from 'lucide-react';
+import { LogOut, Menu, PlusCircle, User, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import { SiteLogo } from '@/components/layout/site-logo';
 import { CartNavButton } from '@/components/nav/cart-nav-button';
 import {
   CategoriesNavDropdown,
@@ -27,13 +27,7 @@ export function Navbar() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-4">
-            <Link
-              href="/"
-              className="text-primary flex shrink-0 items-center gap-2 text-xl font-bold"
-            >
-              <ShoppingBag className="h-6 w-6" />
-              <span className="hidden sm:inline">{SITE_NAME_FA}</span>
-            </Link>
+            <SiteLogo priority size="lg" />
             <div className="hidden items-center gap-1 lg:flex">
               <Link
                 href="/products"
@@ -48,26 +42,27 @@ export function Navbar() {
                 مزایده‌ها
               </Link>
               <CategoriesNavDropdown />
+              <LocationPicker />
+              <Button asChild className='rounded-md'>
+                <Link href="/products/new">
+                  ثبت آگهی
+                  <PlusCircle className="h-5 w-5" />
+                </Link>
+              </Button>
+              <NavbarSearch className="hidden max-w-md min-w-sm md:flex" />
             </div>
           </div>
 
-          <NavbarSearch className="hidden max-w-md md:flex" />
 
           <div className="hidden items-center gap-2 md:flex">
             <CartNavButton />
-            <LocationPicker />
             <ThemeToggle />
             {loading ? (
               <div className="bg-muted h-8 w-20 animate-pulse rounded" />
             ) : user ? (
               <>
-                <Button asChild>
-                  <Link href="/products/new">
-                    <PlusCircle className="h-5 w-5" />
-                  </Link>
-                </Button>
                 <MessagesNavButton />
-                <Button variant="outline" asChild>
+                <Button variant="card" asChild className="h-10 w-10">
                   <Link href="/dashboard">
                     <User className="h-5 w-5" />
                   </Link>
@@ -95,7 +90,7 @@ export function Navbar() {
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="منو"
             >
-              {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {menuOpen ? <X className="min-h-6 min-w-6" /> : <Menu className="min-h-6 min-w-6" />}
             </Button>
           </div>
         </div>

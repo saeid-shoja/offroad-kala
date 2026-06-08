@@ -18,6 +18,11 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { useCategories } from '@/stores/categories-store';
 
+const OPTION_CARD_STYLE = "bg-card flex items-start gap-4 rounded-md border p-3 lg:p-6"
+const OPTIONS_CARD_ICON = "text-primary h-5 w-5 lg:h-7 lg:w-7 shrink-0"
+const OPTIONS_CARD_TITLE = "text-sm lg:text-base font-bold"
+const OPTIONS_CARD_DESC = "text-muted-foreground mt-1 text-xs lg:text-sm"
+
 export default function MainSection() {
   const [shopProducts, setShopProducts] = useState<any[]>([]);
   const [clientProducts, setClientProducts] = useState<any[]>([]);
@@ -45,48 +50,48 @@ export default function MainSection() {
   }, []);
 
   return (
-    <div className="space-y-10">
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-3 container">
-        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
-          <Shield className="text-primary h-10 w-10" />
+    <div className="space-y-5 lg:space-y-10">
+      <section className="container grid grid-cols-1 gap-2 lg:gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className={OPTION_CARD_STYLE}>
+          <Shield className={OPTIONS_CARD_ICON} />
           <div>
-            <h3 className="font-bold">با تضمین فروشگاه</h3>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <h3 className={OPTIONS_CARD_TITLE}>با تضمین فروشگاه</h3>
+            <p className={OPTIONS_CARD_DESC}>
               محصولات دارای نشان تضمین، اصالت کالا را از فروشگاه ما دارند
             </p>
           </div>
         </div>
-        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
-          <Sparkles className="text-secondary h-10 w-10" />
+        <div className={OPTION_CARD_STYLE}>
+          <Sparkles className={OPTIONS_CARD_ICON} />
           <div>
-            <h3 className="font-bold">تقویت شده</h3>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <h3 className={OPTIONS_CARD_TITLE}>تقویت شده</h3>
+            <p className={OPTIONS_CARD_DESC}>
               آگهی شما ۴ روز در بالای همه لیست‌ها می‌ماند، حتی با ثبت آگهی‌های جدید
             </p>
           </div>
         </div>
-        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
-          <TrendingUp className="text-secondary h-10 w-10" />
+        <div className={OPTION_CARD_STYLE}>
+          <TrendingUp className={OPTIONS_CARD_ICON} />
           <div>
-            <h3 className="font-bold">پله شده</h3>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <h3 className={OPTIONS_CARD_TITLE}>پله شده</h3>
+            <p className={OPTIONS_CARD_DESC}>
               یک‌بار به بالای لیست می‌رود و زمان انتشار آگهی به‌روز می‌شود
             </p>
           </div>
         </div>
-        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
-          <PackageSearch className="text-accent h-10 w-10" />
+        <div className={OPTION_CARD_STYLE}>
+          <PackageSearch className={OPTIONS_CARD_ICON} />
           <div>
-            <h3 className="font-bold">خرید و فروش آسان</h3>
-            <p className="text-muted-foreground mt-1 text-sm">
+            <h3 className={OPTIONS_CARD_TITLE}>خرید و فروش آسان</h3>
+            <p className={OPTIONS_CARD_DESC}>
               مانند دیوار، آگهی خود را ثبت کنید و محصولتان را بفروشید
             </p>
           </div>
         </div>
       </section>
 
-      <section className="bg-border/30 p-5 my-5 w-full">
-        <div className="mb-5 flex items-center justify-between container">
+      <section className="bg-border/30 -mx-4 px-4 py-5">
+        <div className="container mb-5 flex flex-wrap items-center justify-between gap-2">
           <h2 className="flex items-center gap-2 text-xl font-bold">
             <Store className="text-primary h-6 w-6" />
             محصولات فروشگاه
@@ -99,7 +104,7 @@ export default function MainSection() {
           </Link>
         </div>
         {shopProducts.length > 0 ? (
-          <div className="grid gap-4 grid-cols-4 lg:grid-cols-6 w-full container">
+          <div className="container grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-6">
             {shopProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -109,8 +114,8 @@ export default function MainSection() {
         )}
       </section>
 
-      <section className="border-y border-secondary/50 p-6 w-full">
-        <div className="mb-6 flex items-center justify-between container">
+      <section className="border-y border-secondary/50 -mx-4 px-4 py-6">
+        <div className="container mb-6 flex flex-wrap items-center justify-between gap-2">
           <h2 className="flex items-center gap-2 text-xl font-bold">
             <Gavel className="text-violet-600 h-6 w-6" />
             مزایده‌ها
@@ -123,7 +128,7 @@ export default function MainSection() {
           </Link>
         </div>
         {auctionProducts.length > 0 ? (
-          <div className="grid grid-cols-4 lg:grid-cols-6 gap-4 container">
+          <div className="container grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-6">
             {auctionProducts.map((product) => (
               <AuctionProductCard key={product.id} product={product} />
             ))}
@@ -135,8 +140,8 @@ export default function MainSection() {
         )}
       </section>
 
-      <section className="border-y border-border p-6">
-        <div className="mb-6 flex items-center justify-between container">
+      <section className="border-y border-border -mx-4 px-4 py-6">
+        <div className="container mb-6 flex flex-wrap items-center justify-between gap-2">
           <h2 className="flex items-center gap-2 text-xl font-bold">
             <PackageSearch className="text-secondary h-6 w-6" />
             آگهی‌های کاربران
@@ -146,7 +151,7 @@ export default function MainSection() {
           </Link>
         </div>
         {clientProducts.length > 0 ? (
-          <div className="grid gap-4 grid-cols-4 lg:grid-cols-6 container">
+          <div className="container grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-6">
             {clientProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -157,7 +162,7 @@ export default function MainSection() {
       </section>
 
       <section className="container">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xl font-bold">دسته‌بندی محصولات</h2>
           <Link href="/categories" className="text-primary text-sm hover:underline">
             همه دسته‌ها

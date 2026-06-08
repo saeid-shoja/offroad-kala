@@ -27,6 +27,10 @@ const SUBMENU_PANEL = cn(LIBRARY_MENU_WIDTH, 'min-w-62 overflow-y-auto p-1 shado
 /** Chevron on the left, label on the right (RTL) */
 const MENU_ROW_RTL = cn(MENU_ROW, '[&>svg]:shrink-0');
 
+/** Mobile sidebar: icon visually left, Persian label visually right */
+const MOBILE_MENU_ROW_RTL = cn(MENU_ROW, 'w-full flex-row-reverse [&>svg]:shrink-0');
+const MOBILE_MENU_ROW_TEXT = cn(MENU_ROW, 'w-full');
+
 type CategoriesNavDropdownProps = {
   className?: string;
   triggerClassName?: string;
@@ -117,15 +121,15 @@ function LibrarySubmenuDesktop({ library }: { library: LibraryNode }) {
       <MenubarSubContent className={SUBMENU_PANEL}>
         {isFlat
           ? library.children.map((item) => (
-              <MenubarItem key={item.id} asChild className="p-0 focus:bg-transparent">
-                <MenuLinkRow className="flex justify-end pr-3" href={getLibraryNodeHref(item)}>
-                  {item.name}
-                </MenuLinkRow>
-              </MenubarItem>
-            ))
+            <MenubarItem key={item.id} asChild className="p-0 focus:bg-transparent">
+              <MenuLinkRow className="flex justify-end pr-3" href={getLibraryNodeHref(item)}>
+                {item.name}
+              </MenuLinkRow>
+            </MenubarItem>
+          ))
           : library.children.map((group) => (
-              <PartGroupSubmenuDesktop key={group.id} group={group} />
-            ))}
+            <PartGroupSubmenuDesktop key={group.id} group={group} />
+          ))}
       </MenubarSubContent>
     </MenubarSub>
   );
@@ -191,7 +195,7 @@ function MobileGroupSection({
       <Link
         href={getLibraryNodeHref(group)}
         onClick={onNavigate}
-        className={cn(MENU_ROW, 'hover:bg-accent w-full rounded-sm')}
+        className={cn(MOBILE_MENU_ROW_TEXT, 'hover:bg-accent rounded-sm')}
       >
         {group.name}
       </Link>
@@ -202,12 +206,12 @@ function MobileGroupSection({
     <Collapsible className="w-full">
       <CollapsibleTrigger
         className={cn(
-          MENU_ROW_RTL,
-          'hover:bg-accent w-full rounded-sm font-medium [&[data-state=open]>svg:first-child]:-rotate-90',
+          MOBILE_MENU_ROW_RTL,
+          'hover:bg-accent rounded-sm font-medium [&[data-state=open]>svg:first-child]:-rotate-90',
         )}
       >
-        <ChevronDown className="size-4 shrink-0 opacity-70 transition-transform" />
-        <span className="flex-1 truncate text-end">{group.name}</span>
+        <ChevronDown className="size-4 opacity-70 transition-transform" />
+        <span className="flex-1 truncate text-start">{group.name}</span>
       </CollapsibleTrigger>
       <CollapsibleContent className="border-border/60 mr-2 space-y-0.5 border-r-2 pr-2">
         {group.children.map((sub) => (
@@ -215,7 +219,7 @@ function MobileGroupSection({
             key={sub.id}
             href={getLibraryNodeHref(sub)}
             onClick={onNavigate}
-            className={cn(MENU_ROW, 'hover:bg-accent w-full rounded-sm')}
+            className={cn(MOBILE_MENU_ROW_TEXT, 'hover:bg-accent rounded-sm')}
           >
             {sub.name}
           </Link>
@@ -224,8 +228,8 @@ function MobileGroupSection({
           href={getLibraryNodeHref(group)}
           onClick={onNavigate}
           className={cn(
-            MENU_ROW,
-            'text-muted-foreground hover:bg-accent w-full rounded-sm text-xs',
+            MOBILE_MENU_ROW_TEXT,
+            'text-muted-foreground hover:bg-accent rounded-sm text-xs',
           )}
         >
           همه {group.name}
@@ -254,24 +258,24 @@ function MobileLibrarySection({
           'hover:bg-accent w-full rounded-sm font-semibold [&[data-state=open]>svg:first-child]:-rotate-90',
         )}
       >
+        <span className="flex-1 truncate text-start">{library.name}</span>
         <ChevronDown className="size-4 shrink-0 opacity-70 transition-transform" />
-        <span className="flex-1 truncate text-end">{library.name}</span>
       </CollapsibleTrigger>
       <CollapsibleContent className="border-border/60 mr-2 space-y-0.5 border-r-2 pr-2">
         {isFlat
           ? library.children.map((item) => (
-              <Link
-                key={item.id}
-                href={getLibraryNodeHref(item)}
-                onClick={onNavigate}
-                className={cn(MENU_ROW, 'hover:bg-accent w-full rounded-sm')}
-              >
-                {item.name}
-              </Link>
-            ))
+            <Link
+              key={item.id}
+              href={getLibraryNodeHref(item)}
+              onClick={onNavigate}
+              className={cn(MENU_ROW, 'hover:bg-accent w-full rounded-sm')}
+            >
+              {item.name}
+            </Link>
+          ))
           : library.children.map((group) => (
-              <MobileGroupSection key={group.id} group={group} onNavigate={onNavigate} />
-            ))}
+            <MobileGroupSection key={group.id} group={group} onNavigate={onNavigate} />
+          ))}
       </CollapsibleContent>
     </Collapsible>
   );

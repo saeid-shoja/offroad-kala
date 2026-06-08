@@ -6,7 +6,13 @@ import { SiteFooter } from '@/components/layout/footer';
 import { Navbar } from '@/components/layout/navbar';
 import { JsonLd } from '@/components/seo/json-ld';
 import { Toaster } from '@/components/ui/sonner';
-import { buildOrganizationJsonLd, DEFAULT_OG_IMAGE, getSiteUrl, toAbsoluteUrl } from '@/lib/seo';
+import {
+  buildOrganizationJsonLd,
+  DEFAULT_OG_IMAGE,
+  getSiteUrl,
+  SITE_LOGO,
+  toAbsoluteUrl,
+} from '@/lib/seo';
 import { cn } from '@/lib/utils';
 import { FavoritesSync } from '@/providers/favorites-sync';
 import { StoreInitializer } from '@/providers/store-initializer';
@@ -53,6 +59,10 @@ export const metadata: Metadata = {
     images: [toAbsoluteUrl(DEFAULT_OG_IMAGE)!],
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: SITE_LOGO,
+    apple: SITE_LOGO,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -67,7 +77,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <StoreInitializer />
           <FavoritesSync />
           <Navbar />
-          <main className="mx-auto min-h-[calc(100vh-5rem)] w-full flex-1 py-6">{children}</main>
+          <main className="mx-auto min-h-[calc(100vh-5rem)] w-full flex-1 overflow-x-hidden px-4 py-6">
+            {children}
+          </main>
           <SiteFooter />
           <Toaster />
         </ThemeProvider>
