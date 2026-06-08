@@ -19,7 +19,13 @@ export function CartLineItem({ item }: { item: CartItem }) {
         className="bg-muted size-20 shrink-0 overflow-hidden rounded-lg"
       >
         {item.image ? (
-          <Image width={300} height={400} src={item.image} alt="" className="size-full object-cover" />
+          <Image
+            width={300}
+            height={400}
+            src={item.image}
+            alt=""
+            className="size-full object-cover"
+          />
         ) : (
           <div className="text-muted-foreground flex size-full items-center justify-center text-xs">
             بدون تصویر

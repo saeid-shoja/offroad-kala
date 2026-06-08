@@ -13,7 +13,7 @@ export default function AdminDashboardPage() {
     adminApi
       .dashboard()
       .then(setData)
-      .catch(() => { });
+      .catch(() => {});
   }, []);
 
   if (!data) {
@@ -93,10 +93,11 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${p.status === 'ACTIVE'
+                  className={`rounded-full px-2 py-0.5 text-xs ${
+                    p.status === 'ACTIVE'
                       ? 'bg-green-100 text-green-700'
                       : 'bg-gray-100 text-gray-600'
-                    }`}
+                  }`}
                 >
                   {p.status === 'ACTIVE' ? 'فعال' : p.status}
                 </span>

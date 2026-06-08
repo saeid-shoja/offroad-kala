@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
                 className="w-full rounded-sm border px-3 py-2"
               />
             </label>
-            <label className="block text-sm" htmlFor='password'>
+            <label className="block text-sm" htmlFor="password">
               <span className="mb-1 block text-gray-600">
                 رمز عبور {editingId ? '(خالی = بدون تغییر)' : ''}
               </span>

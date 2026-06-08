@@ -11,7 +11,7 @@ export function PasswordInput({ className = '', ...props }: PasswordInputProps) 
   return (
     <div className="relative">
       <input
-        id='password'
+        id="password"
         type={show ? 'text' : 'password'}
         className={`w-full rounded-sm border px-3 py-2 pe-10 outline-none focus:border-primary ${className}`.trim()}
         {...props}
