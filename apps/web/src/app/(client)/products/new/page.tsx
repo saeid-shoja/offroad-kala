@@ -1,97 +1,106 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { STRENGTHENED_DURATION_DAYS, STRENGTHENED_LISTING_FEE } from '@offroad/shared';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import {
-  type AuctionListingFields,
-  AuctionListingOptions,
-  validateAuctionListing,
-} from '@/components/form/auction-listing-options';
-import { BoostPaymentDialog } from '@/components/form/boost-payment-dialog';
+import { AuctionListingOptions } from '@/components/form/auction-listing-options';
 import { CitySelect } from '@/components/form/city-select';
 import { dateTimeLocalToIso, defaultMinDateTimeLocal } from '@/components/form/datetime-picker';
+import { FieldError } from '@/components/form/field-error';
+import { ListingPremiumPaymentDialog } from '@/components/form/premium-listing-payment-dialog';
 import { PremiumProductOptions } from '@/components/form/premium-product-options';
 import { PriceInput } from '@/components/form/price-input';
+import { ProductCategoryPicker } from '@/components/form/product-category-picker';
 import { ProductImageUpload } from '@/components/form/product-image-upload';
 import { ProductSituationSelect } from '@/components/form/product-situation-select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/lib/api';
-import type { ProductSituation } from '@/lib/product-utils';
+import { type NewProductFormValues, newProductSchema } from '@/lib/validations/product';
 import { useAuth } from '@/stores/auth-store';
 import { useCategories } from '@/stores/categories-store';
 
 export default function NewProductPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const { partLeaves: partCategories, carBrands: carBrandOptions } = useCategories();
-  const [carBrands, setCarBrands] = useState<string[]>([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState(0);
-  const [categoryId, setCategoryId] = useState('');
-  const [city, setCity] = useState('');
-  const [phone, setPhone] = useState('');
-  const [hasGuarantee, setHasGuarantee] = useState(false);
-  const [isBoosted, setIsBoosted] = useState(false);
-  const [images, setImages] = useState<string[]>([]);
-  const [situation, setSituation] = useState<ProductSituation>('NEW');
-  const [loading, setLoading] = useState(false);
-  const [boostPaymentOpen, setBoostPaymentOpen] = useState(false);
-  const [auctionFields, setAuctionFields] = useState<AuctionListingFields>({
-    isAuction: false,
-    auctionStartPrice: 0,
-    auctionEndsAtLocal: defaultMinDateTimeLocal(),
-    realPriceMin: 0,
-    realPriceMax: 0,
-    buyNowPrice: 0,
+  const { carBrands: carBrandOptions } = useCategories();
+  const [strengthenedPaymentOpen, setStrengthenedPaymentOpen] = useState(false);
+
+  const {
+    register,
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<NewProductFormValues>({
+    resolver: zodResolver(newProductSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      price: 0,
+      categoryId: '',
+      city: '',
+      phone: '',
+      situation: 'NEW',
+      carBrands: [],
+      images: [],
+      hasGuarantee: false,
+      applyStrengthened: false,
+      isAuction: false,
+      auctionStartPrice: 0,
+      auctionEndsAtLocal: defaultMinDateTimeLocal(),
+      realPriceMin: 0,
+      realPriceMax: 0,
+      buyNowPrice: 0,
+    },
   });
+
+  const isAuction = watch('isAuction');
+  const price = watch('price');
+  const hasGuarantee = watch('hasGuarantee');
+  const applyStrengthened = watch('applyStrengthened');
+  const carBrands = watch('carBrands');
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
-      return;
     }
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (price <= 0 && hasGuarantee) setHasGuarantee(false);
-  }, [price, hasGuarantee]);
+    if (price <= 0 && hasGuarantee) setValue('hasGuarantee', false);
+  }, [price, hasGuarantee, setValue]);
 
-  const submitListing = async () => {
-    setLoading(true);
+  const submitListing = async (data: NewProductFormValues) => {
     try {
       await api.products.createPublic({
-        title,
-        description,
-        price: auctionFields.isAuction ? auctionFields.auctionStartPrice : price,
-        categoryId,
-        carBrands: carBrands.length ? carBrands : undefined,
-        city: city || undefined,
-        phone: auctionFields.isAuction ? undefined : phone || undefined,
-        hasGuarantee: auctionFields.isAuction ? false : hasGuarantee,
-        isBoosted,
-        situation,
-        images,
-        isAuction: auctionFields.isAuction,
-        ...(auctionFields.isAuction
+        title: data.title,
+        description: data.description,
+        price: data.isAuction ? data.auctionStartPrice : data.price,
+        categoryId: data.categoryId,
+        carBrands: data.carBrands.length ? data.carBrands : undefined,
+        city: data.city || undefined,
+        phone: data.isAuction ? undefined : data.phone || undefined,
+        hasGuarantee: data.isAuction ? false : data.hasGuarantee,
+        applyStrengthened: data.applyStrengthened,
+        situation: data.situation,
+        images: data.images,
+        isAuction: data.isAuction,
+        ...(data.isAuction
           ? {
-              auctionStartPrice: auctionFields.auctionStartPrice,
-              auctionEndsAt: dateTimeLocalToIso(auctionFields.auctionEndsAtLocal),
-              realPriceMin: auctionFields.realPriceMin,
-              realPriceMax: auctionFields.realPriceMax,
-              buyNowPrice: auctionFields.buyNowPrice,
+              auctionStartPrice: data.auctionStartPrice,
+              auctionEndsAt: dateTimeLocalToIso(data.auctionEndsAtLocal),
+              realPriceMin: data.realPriceMin,
+              realPriceMax: data.realPriceMax,
+              buyNowPrice: data.buyNowPrice,
             }
           : {}),
       });
@@ -100,40 +109,25 @@ export default function NewProductPage() {
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'خطا در ثبت آگهی');
     } finally {
-      setLoading(false);
-      setBoostPaymentOpen(false);
+      setStrengthenedPaymentOpen(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (auctionFields.isAuction) {
-      const auctionErr = validateAuctionListing(auctionFields);
-      if (auctionErr) {
-        toast.error(auctionErr);
-        return;
-      }
-    } else if (price <= 0) {
-      toast.error('قیمت محصول را وارد کنید');
+  const onValidSubmit = (data: NewProductFormValues) => {
+    if (!data.isAuction && data.applyStrengthened) {
+      setStrengthenedPaymentOpen(true);
       return;
     }
-
-    if (!auctionFields.isAuction && isBoosted) {
-      setBoostPaymentOpen(true);
-      return;
-    }
-
-    void submitListing();
+    void submitListing(data);
   };
 
   if (authLoading) return null;
 
   return (
-    <div className="mx-auto max-w-2xl py-8">
+    <div className="mx-auto w-full max-w-2xl px-4 py-6 sm:py-8">
       <h1 className="mb-8 text-2xl font-bold">ثبت آگهی جدید</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onValidSubmit)} className="space-y-6" noValidate>
         <Card>
           <CardHeader>
             <CardTitle className="text-base">اطلاعات اصلی</CardTitle>
@@ -141,54 +135,43 @@ export default function NewProductPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">عنوان آگهی</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="مثلاً: لاستیک ۳۳ اینچ گرندپیت"
-                required
-              />
+              <Input id="title" placeholder="مثلاً: لاستیک ۳۳ اینچ گرندپیت" {...register('title')} />
+              <FieldError message={errors.title?.message} />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">توضیحات</Label>
               <Textarea
                 id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
                 rows={5}
                 placeholder="توضیحات کامل محصول..."
-                required
+                {...register('description')}
               />
+              <FieldError message={errors.description?.message} />
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="price">
-                  {auctionFields.isAuction ? 'قیمت پایه (اختیاری)' : 'قیمت (تومان)'}
-                </Label>
-                <PriceInput
-                  id="price"
-                  value={price}
-                  onChange={setPrice}
-                  required={!auctionFields.isAuction}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>دسته‌بندی</Label>
-                <Select value={categoryId} onValueChange={setCategoryId} required>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="انتخاب کنید" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {partCategories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="price">{isAuction ? 'قیمت پایه (اختیاری)' : 'قیمت (تومان)'}</Label>
+              <Controller
+                name="price"
+                control={control}
+                render={({ field }) => (
+                  <PriceInput id="price" value={field.value} onChange={field.onChange} />
+                )}
+              />
+              <FieldError message={errors.price?.message} />
+            </div>
+
+            <div className="space-y-2">
+              <Label>دسته‌بندی</Label>
+              <Controller
+                name="categoryId"
+                control={control}
+                render={({ field }) => (
+                  <ProductCategoryPicker value={field.value} onValueChange={field.onChange} />
+                )}
+              />
+              <FieldError message={errors.categoryId?.message} />
             </div>
           </CardContent>
         </Card>
@@ -209,10 +192,12 @@ export default function NewProductPage() {
                       size="sm"
                       variant={selected ? 'default' : 'outline'}
                       onClick={() =>
-                        setCarBrands((prev) =>
+                        setValue(
+                          'carBrands',
                           selected
-                            ? prev.filter((v) => v !== option.value)
-                            : [...prev, option.value],
+                            ? carBrands.filter((v) => v !== option.value)
+                            : [...carBrands, option.value],
+                          { shouldValidate: true },
                         )
                       }
                     >
@@ -227,53 +212,100 @@ export default function NewProductPage() {
 
         <Card>
           <CardContent className="space-y-4 pt-6">
-            <ProductSituationSelect value={situation} onChange={setSituation} />
+            <Controller
+              name="situation"
+              control={control}
+              render={({ field }) => (
+                <ProductSituationSelect value={field.value} onChange={field.onChange} />
+              )}
+            />
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <CitySelect value={city} onChange={setCity} />
+              <Controller
+                name="city"
+                control={control}
+                render={({ field }) => (
+                  <CitySelect value={field.value ?? ''} onChange={field.onChange} />
+                )}
+              />
               <div className="space-y-2">
                 <Label htmlFor="phone">شماره تماس</Label>
                 <Input
                   id="phone"
                   type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
                   placeholder="0912xxxxxxx"
                   dir="ltr"
                   className="text-end"
+                  {...register('phone')}
                 />
+                <FieldError message={errors.phone?.message} />
               </div>
             </div>
 
-            <ProductImageUpload images={images} onChange={setImages} />
+            <Controller
+              name="images"
+              control={control}
+              render={({ field }) => (
+                <ProductImageUpload images={field.value} onChange={field.onChange} />
+              )}
+            />
           </CardContent>
         </Card>
 
-        <AuctionListingOptions
-          value={auctionFields}
-          onChange={(patch) => setAuctionFields((prev) => ({ ...prev, ...patch }))}
+        <Controller
+          name="isAuction"
+          control={control}
+          render={() => (
+            <AuctionListingOptions
+              value={{
+                isAuction: watch('isAuction'),
+                auctionStartPrice: watch('auctionStartPrice'),
+                auctionEndsAtLocal: watch('auctionEndsAtLocal'),
+                realPriceMin: watch('realPriceMin'),
+                realPriceMax: watch('realPriceMax'),
+                buyNowPrice: watch('buyNowPrice'),
+              }}
+              onChange={(patch) => {
+                for (const [key, val] of Object.entries(patch)) {
+                  setValue(key as keyof NewProductFormValues, val as never, {
+                    shouldValidate: true,
+                  });
+                }
+              }}
+              errors={{
+                auctionStartPrice: errors.auctionStartPrice?.message,
+                buyNowPrice: errors.buyNowPrice?.message,
+                realPriceMin: errors.realPriceMin?.message,
+                realPriceMax: errors.realPriceMax?.message,
+                auctionEndsAtLocal: errors.auctionEndsAtLocal?.message,
+              }}
+            />
+          )}
         />
 
-        {!auctionFields.isAuction && (
+        {!isAuction && (
           <PremiumProductOptions
             productPrice={price}
             hasGuarantee={hasGuarantee}
-            isBoosted={isBoosted}
-            onGuaranteeChange={setHasGuarantee}
-            onBoostedChange={setIsBoosted}
+            applyStrengthened={applyStrengthened}
+            onGuaranteeChange={(v) => setValue('hasGuarantee', v)}
+            onStrengthenedChange={(v) => setValue('applyStrengthened', v)}
           />
         )}
 
-        <Button type="submit" className="w-full" size="lg" disabled={loading}>
-          {loading ? 'در حال ثبت...' : 'ثبت آگهی'}
+        <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+          {isSubmitting ? 'در حال ثبت...' : 'ثبت آگهی'}
         </Button>
       </form>
 
-      <BoostPaymentDialog
-        open={boostPaymentOpen}
-        onOpenChange={setBoostPaymentOpen}
-        loading={loading}
-        onConfirm={submitListing}
+      <ListingPremiumPaymentDialog
+        open={strengthenedPaymentOpen}
+        onOpenChange={setStrengthenedPaymentOpen}
+        loading={isSubmitting}
+        title="پرداخت هزینه تقویت آگهی"
+        description={`آگهی شما به مدت ${STRENGTHENED_DURATION_DAYS} روز در بالای لیست‌ها نمایش داده می‌شود.`}
+        fee={STRENGTHENED_LISTING_FEE}
+        onConfirm={() => void submitListing(getValues())}
       />
     </div>
   );

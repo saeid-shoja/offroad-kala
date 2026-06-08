@@ -69,10 +69,11 @@ function LibraryNodeItem({
   if (!hasChildren) {
     return (
       <label
+        htmlFor={`${node.id}-${node.name}`}
         className="hover:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-sm py-1.5 pr-2"
         style={{ paddingRight: `${depth * 12 + 8}px` }}
       >
-        <Checkbox checked={isSelected} onCheckedChange={selectNode} />
+        <Checkbox id={`${node.id}-${node.name}`} checked={isSelected} onCheckedChange={selectNode} />
         <span className="text-sm">{node.name}</span>
       </label>
     );

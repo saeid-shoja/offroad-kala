@@ -135,6 +135,7 @@ model Product {
   advertiser         Advertiser        @default(CLIENT)
   hasGuarantee       Boolean            @default(false)
   isBoosted          Boolean            @default(false)
+  strengthenedUntil  DateTime?
   status             ProductStatus      @default(ACTIVE)
   situation          ProductSituation?
   city               String?

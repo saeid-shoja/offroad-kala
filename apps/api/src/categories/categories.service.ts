@@ -259,9 +259,16 @@ export class CategoriesService {
       }
     }
 
+    const category = await this.prisma.category.findUnique({ where: { id } });
+    if (!category) throw new NotFoundException('دسته‌بندی یافت نشد');
+
     return this.prisma.category.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        // Detach from seed sync so admin edits are not overwritten on next boot/seed.
+        ...(category.isSystem ? { isSystem: false } : {}),
+      },
       include: { library: true, parent: true },
     });
   }
@@ -306,7 +313,16 @@ export class CategoriesService {
   }
 
   async updateLibrary(id: string, data: UpdateLibraryDto) {
-    return this.prisma.library.update({ where: { id }, data });
+    const library = await this.prisma.library.findUnique({ where: { id } });
+    if (!library) throw new NotFoundException('کتابخانه یافت نشد');
+
+    return this.prisma.library.update({
+      where: { id },
+      data: {
+        ...data,
+        ...(library.isSystem ? { isSystem: false } : {}),
+      },
+    });
   }
 
   async removeLibrary(id: string) {

@@ -2,8 +2,8 @@
 
 import { formatPrice } from '@offroad/shared';
 import { Minus, Plus, Trash2 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
-
 import { Button } from '@/components/ui/button';
 import type { CartItem } from '@/lib/cart-types';
 import { useCart } from '@/stores/cart-store';
@@ -19,7 +19,7 @@ export function CartLineItem({ item }: { item: CartItem }) {
         className="bg-muted size-20 shrink-0 overflow-hidden rounded-lg"
       >
         {item.image ? (
-          <img src={item.image} alt="" className="size-full object-cover" />
+          <Image width={300} height={400} src={item.image} alt="" className="size-full object-cover" />
         ) : (
           <div className="text-muted-foreground flex size-full items-center justify-center text-xs">
             بدون تصویر

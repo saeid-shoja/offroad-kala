@@ -74,6 +74,9 @@ export const api = {
       request<any>(`/products/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (id: string) => request<any>(`/products/${id}`, { method: 'DELETE' }),
     reactivate: (id: string) => request<any>(`/products/${id}/reactivate`, { method: 'POST' }),
+    applyStrengthened: (id: string) =>
+      request<any>(`/products/${id}/apply-strengthened`, { method: 'POST' }),
+    applyBoost: (id: string) => request<any>(`/products/${id}/apply-boost`, { method: 'POST' }),
   },
 
   categories: {

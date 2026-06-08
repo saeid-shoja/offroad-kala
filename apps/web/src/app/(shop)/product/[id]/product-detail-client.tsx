@@ -86,7 +86,7 @@ export function ProductDetailClient() {
           <div className="flex gap-2 overflow-x-auto">
             {images.map((img: string, i: number) => (
               <Button
-                key={i}
+                key={img}
                 onClick={() => setCurrentImage(i)}
                 className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-sm border-2 ${currentImage === i ? 'border-primary' : 'border-transparent'}`}
               >
@@ -115,7 +115,7 @@ export function ProductDetailClient() {
                 >
                   <Edit3 className="h-4 w-4" />
                 </Link>
-                <button className="rounded-sm p-2 text-red-500 hover:bg-red-50">
+                <button type="button" className="rounded-sm p-2 text-red-500 hover:bg-red-50">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -169,6 +169,12 @@ export function ProductDetailClient() {
           )}
           {product.isAuction && (
             <Badge className="bg-violet-600 text-white hover:bg-violet-600">مزایده</Badge>
+          )}
+          {product.isStrengthenedActive && (
+            <span className="flex items-center gap-1 rounded-full bg-violet-100 px-3 py-1 text-sm text-violet-700">
+              <Sparkles className="h-4 w-4" />
+              تقویت شده
+            </span>
           )}
           {product.isBoosted && (
             <span className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-700">

@@ -2,7 +2,7 @@
 
 import { formatPrice } from '@offroad/shared';
 import { CheckCircle, Shield, TrendingUp, XCircle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { adminApi } from '@/lib/api';
 
@@ -13,7 +13,7 @@ export default function AdminProductsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchProducts = () => {
+  const fetchProducts = useCallback(() => {
     const params: Record<string, string> = { page: String(page), limit: '20' };
     if (type) params.advertiser = type;
     if (status) params.status = status;
@@ -24,11 +24,11 @@ export default function AdminProductsPage() {
         setTotalPages(res.totalPages);
       })
       .catch(() => toast.error('بارگذاری محصولات ناموفق بود'));
-  };
+  }, [page, type, status]);
 
   useEffect(() => {
     fetchProducts();
-  }, [page, type, status]);
+  }, [fetchProducts]);
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
@@ -133,6 +133,7 @@ export default function AdminProductsPage() {
                 <td className="px-4 py-3 text-center">
                   <div className="flex justify-center gap-1">
                     <button
+                      type="button"
                       onClick={() =>
                         handleStatusChange(p.id, p.status === 'ACTIVE' ? 'PENDING' : 'ACTIVE')
                       }
@@ -164,6 +165,7 @@ export default function AdminProductsPage() {
         <div className="flex justify-center gap-2">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
             <button
+              type="button"
               key={p}
               onClick={() => setPage(p)}
               className={`h-9 w-9 rounded-sm text-sm ${page === p ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}

@@ -9,22 +9,10 @@ import {
 import { AlertTriangle, Clock, Gavel, TrendingUp, Users, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import { PriceInput } from '@/components/form/price-input';
+import { BidDialog } from '@/components/auction/bid-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { api } from '@/lib/api';
 import { getBuyNowPrice, isPurchasable } from '@/lib/purchasable';
 import { useAuth } from '@/stores/auth-store';
@@ -55,13 +43,7 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
 
   const [summary, setSummary] = useState<any>(null);
   const [countdown, setCountdown] = useState('');
-  const [bidAmount, setBidAmount] = useState(0);
   const [bidOpen, setBidOpen] = useState(false);
-  const [bidderName, setBidderName] = useState('');
-  const [bidderPhone, setBidderPhone] = useState('');
-  const [bidderAddress, setBidderAddress] = useState('');
-  const [bidderCity, setBidderCity] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [outbidNotice, setOutbidNotice] = useState(false);
   const [endedNotice, setEndedNotice] = useState(false);
 
@@ -75,12 +57,6 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
   useEffect(() => {
     loadSummary();
   }, [loadSummary]);
-
-  useEffect(() => {
-    if (user?.name) setBidderName(user.name);
-    if (user?.phone) setBidderPhone(user.phone);
-    if (user?.city) setBidderCity(user.city);
-  }, [user]);
 
   useEffect(() => {
     if (!product.auctionEndsAt) return;
@@ -100,12 +76,6 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
     if (summary?.userWasOutbid) setOutbidNotice(true);
   }, [summary?.userWasOutbid]);
 
-  useEffect(() => {
-    const min =
-      summary?.minNextBid ?? getMinimumNextBid(product.auctionCurrentPrice ?? product.price);
-    setBidAmount(min);
-  }, [summary, product.auctionCurrentPrice, product.price]);
-
   const currentPrice = summary?.currentPrice ?? product.auctionCurrentPrice ?? product.price;
   const minNextBid = summary?.minNextBid ?? getMinimumNextBid(currentPrice);
   const bidCount = summary?.bidCount ?? product.bidCount ?? 0;
@@ -120,28 +90,6 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
       return;
     }
     setBidOpen(true);
-  };
-
-  const submitBid = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      const res = await api.auctions.placeBid(product.id, {
-        amount: bidAmount,
-        bidderName,
-        bidderPhone,
-        bidderAddress,
-        bidderCity: bidderCity || undefined,
-      });
-      toast.success(res.message || 'پیشنهاد ثبت شد');
-      setOutbidNotice(false);
-      setBidOpen(false);
-      loadSummary();
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'خطا در ثبت پیشنهاد');
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const handleBuyNow = () => {
@@ -270,70 +218,17 @@ export function AuctionPanel({ product }: AuctionPanelProps) {
         </CardContent>
       </Card>
 
-      <Dialog open={bidOpen} onOpenChange={setBidOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>ثبت پیشنهاد</DialogTitle>
-            <DialogDescription>
-              حداقل مبلغ: {formatPrice(minNextBid)} تومان. اطلاعات تماس برای هماهنگی در صورت برنده
-              شدن لازم است.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={submitBid} className="space-y-4">
-            <div className="space-y-2">
-              <Label>مبلغ پیشنهاد (تومان)</Label>
-              <PriceInput value={bidAmount} onChange={setBidAmount} required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bid-name">نام و نام خانوادگی</Label>
-              <Input
-                id="bid-name"
-                value={bidderName}
-                onChange={(e) => setBidderName(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bid-phone">شماره تماس</Label>
-              <Input
-                id="bid-phone"
-                type="tel"
-                dir="ltr"
-                className="text-end"
-                value={bidderPhone}
-                onChange={(e) => setBidderPhone(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bid-city">شهر (اختیاری)</Label>
-              <Input
-                id="bid-city"
-                value={bidderCity}
-                onChange={(e) => setBidderCity(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bid-address">آدرس کامل</Label>
-              <Textarea
-                id="bid-address"
-                value={bidderAddress}
-                onChange={(e) => setBidderAddress(e.target.value)}
-                rows={3}
-                required
-              />
-            </div>
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button type="button" variant="outline" onClick={() => setBidOpen(false)}>
-                انصراف
-              </Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? 'در حال ثبت...' : 'ثبت پیشنهاد'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <BidDialog
+        open={bidOpen}
+        onOpenChange={setBidOpen}
+        productId={product.id}
+        minNextBid={minNextBid}
+        user={user}
+        onSuccess={() => {
+          setOutbidNotice(false);
+          loadSummary();
+        }}
+      />
     </div>
   );
 }

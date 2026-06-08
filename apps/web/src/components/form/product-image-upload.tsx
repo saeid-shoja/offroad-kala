@@ -1,6 +1,7 @@
 'use client';
 
 import { ImagePlus, X } from 'lucide-react';
+import Image from 'next/image';
 import { useRef, useState } from 'react';
 import { FormError } from '@/components/form/form-message';
 import { Button } from '@/components/ui/button';
@@ -79,12 +80,15 @@ export function ProductImageUpload({ images, onChange, className }: ProductImage
         {images.length > 0 && (
           <ul className="flex flex-wrap gap-2">
             {images.map((src, index) => (
-              <li
-                key={`${index}-${src.slice(0, 32)}`}
-                className="bg-muted relative size-20 overflow-hidden rounded-sm border"
-              >
+              <li key={src} className="bg-muted relative size-20 overflow-hidden rounded-sm border">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" className="size-full object-cover" />
+                <Image
+                  width={200}
+                  height={200}
+                  src={src}
+                  alt=""
+                  className="size-full object-cover"
+                />
                 <Button
                   type="button"
                   variant="secondary"

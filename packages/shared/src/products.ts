@@ -29,7 +29,22 @@ export const PERSIAN_MONTHS = [
 
 /** Listing premium fees (Toman) */
 export const GUARANTEE_FEE_RATE = 0.05;
+/** پله شده — one-time bump to top (updates listedAt) */
 export const BOOST_LISTING_FEE = 100_000;
+/** تقویت شده — pinned on top for 4 days (ignores listedAt while active) */
+export const STRENGTHENED_LISTING_FEE = 100_000;
+export const STRENGTHENED_DURATION_DAYS = 4;
+
+export function isStrengthenedActive(strengthenedUntil?: Date | string | null): boolean {
+  if (!strengthenedUntil) return false;
+  return new Date(strengthenedUntil).getTime() > Date.now();
+}
+
+export function strengthenedEndsAt(from = new Date()): Date {
+  const ends = new Date(from);
+  ends.setDate(ends.getDate() + STRENGTHENED_DURATION_DAYS);
+  return ends;
+}
 
 export function getGuaranteeFee(productPrice: number): number {
   if (!Number.isFinite(productPrice) || productPrice <= 0) return 0;

@@ -1,6 +1,6 @@
 'use client';
 
-import { formatPrice, timeAgo } from '@offroad/shared';
+import { formatPrice, isStrengthenedActive, timeAgo } from '@offroad/shared';
 import { Clock, MapPin, Package, Shield, Sparkles, TrendingUp } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -36,6 +36,8 @@ interface ProductCardProps {
     auctionEndsAt?: string | null;
     hideSellerPhone?: boolean;
     isBoosted?: boolean;
+    isStrengthenedActive?: boolean;
+    strengthenedUntil?: string | null;
   };
 }
 
@@ -50,6 +52,8 @@ export function ProductCard({ product }: ProductCardProps) {
   const situationLabel = getSituationLabel(situation);
   const postedAt = timeAgo(new Date(product.listedAt ?? product.createdAt));
   const canBuy = isPurchasable(product);
+  const strengthenedActive =
+    product.isStrengthenedActive ?? isStrengthenedActive(product.strengthenedUntil);
 
   return (
     <Card className="hover:border-primary/40 flex h-full flex-col gap-0 overflow-hidden py-0 transition-all hover:shadow-lg hover:scale-102">
@@ -91,6 +95,12 @@ export function ProductCard({ product }: ProductCardProps) {
               <Badge className="bg-green-600 text-white hover:bg-green-600">
                 <Shield className="h-3 w-3" />
                 تضمین شده
+              </Badge>
+            )}
+            {strengthenedActive && (
+              <Badge className="bg-violet-600 text-white hover:bg-violet-600">
+                <Sparkles className="h-3 w-3" />
+                تقویت شده
               </Badge>
             )}
             {product.isBoosted && (

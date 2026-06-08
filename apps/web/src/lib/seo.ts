@@ -104,7 +104,7 @@ export function buildCategoryMetadata(name: string, slug: string): Metadata {
     title: `خرید و فروش ${name}`,
     description: `مشاهده و خرید ${name} — آگهی‌ها، فروشگاه و مزایده‌های ${name} در ${SITE_NAME_FA}. بهترین قیمت لوازم آفرود.`,
     path: `/category/${slug}`,
-    keywords: [name, 'لوازم آفرود', 'خرید ' + name, 'فروش ' + name, SITE_NAME_FA],
+    keywords: [name, 'لوازم آفرود', `خرید ${name}`, `فروش ${name}`, SITE_NAME_FA],
   });
 }
 

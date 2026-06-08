@@ -76,9 +76,8 @@ export function LocationPicker() {
                   >
                     {province.name}
                     <ChevronDown
-                      className={`h-4 w-4 opacity-60 transition-transform ${
-                        expandedProvince === province.id ? 'rotate-180' : ''
-                      }`}
+                      className={`h-4 w-4 opacity-60 transition-transform ${expandedProvince === province.id ? 'rotate-180' : ''
+                        }`}
                     />
                   </button>
                 </CollapsibleTrigger>
@@ -87,12 +86,14 @@ export function LocationPicker() {
                     <label
                       key={`${province.id}-${city}`}
                       className="hover:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-sm px-3 py-1.5"
+                      htmlFor={`${province.id}-${city}`}
                     >
                       <Checkbox
+                        id={`${province.id}-${city}`}
                         checked={selectedCities.includes(city)}
                         onCheckedChange={() => toggleCity(city)}
                       />
-                      <Label className="cursor-pointer text-sm font-normal">{city}</Label>
+                      <Label htmlFor={`${province.id}-${city}`} className="cursor-pointer text-sm font-normal">{city}</Label>
                     </label>
                   ))}
                 </CollapsibleContent>

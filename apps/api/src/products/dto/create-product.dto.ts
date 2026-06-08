@@ -48,6 +48,11 @@ export class CreateProductDto {
   @IsBoolean()
   isBoosted?: boolean;
 
+  /** تقویت شده — pin on top for 4 days (client listings) */
+  @IsOptional()
+  @IsBoolean()
+  applyStrengthened?: boolean;
+
   @IsOptional()
   @IsString()
   city?: string;

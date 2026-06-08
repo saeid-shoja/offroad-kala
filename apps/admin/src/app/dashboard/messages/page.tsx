@@ -1,7 +1,7 @@
 'use client';
 
 import { Calendar, Megaphone, Send, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { adminApi } from '@/lib/api';
 
@@ -25,7 +25,7 @@ export default function AdminMessagesPage() {
   const [target, setTarget] = useState('ALL');
   const [userId, setUserId] = useState('');
   const [loading, setLoading] = useState(false);
-  const loadData = () => {
+  const loadData = useCallback(() => {
     adminApi
       .messages()
       .then(setBatches)
@@ -40,11 +40,11 @@ export default function AdminMessagesPage() {
         setUsers([]);
         toast.error('بارگذاری کاربران ناموفق بود');
       });
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

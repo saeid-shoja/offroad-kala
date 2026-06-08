@@ -147,6 +147,7 @@ export function Navbar() {
                 </Link>
                 <MessagesMobileLink onNavigate={closeMenu} />
                 <button
+                  type="button"
                   onClick={() => {
                     logout();
                     closeMenu();

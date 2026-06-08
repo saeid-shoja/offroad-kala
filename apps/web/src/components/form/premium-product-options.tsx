@@ -1,8 +1,13 @@
 'use client';
 
-import { BOOST_LISTING_FEE, formatPrice, getGuaranteeFee } from '@offroad/shared';
-import { Shield, TrendingUp } from 'lucide-react';
-
+import {
+  BOOST_LISTING_FEE,
+  formatPrice,
+  getGuaranteeFee,
+  STRENGTHENED_DURATION_DAYS,
+  STRENGTHENED_LISTING_FEE,
+} from '@offroad/shared';
+import { Shield, Sparkles, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -19,9 +24,14 @@ import { Label } from '@/components/ui/label';
 type PremiumProductOptionsProps = {
   productPrice: number;
   hasGuarantee: boolean;
-  isBoosted: boolean;
+  applyStrengthened: boolean;
   onGuaranteeChange: (value: boolean) => void;
-  onBoostedChange: (value: boolean) => void;
+  onStrengthenedChange: (value: boolean) => void;
+  showStrengthened?: boolean;
+  /** پله شده — profile / legacy flows */
+  showBoost?: boolean;
+  isBoosted?: boolean;
+  onBoostedChange?: (value: boolean) => void;
 };
 
 function ReadMoreButton({ label = 'اطلاعات بیشتر' }: { label?: string }) {
@@ -37,8 +47,12 @@ function ReadMoreButton({ label = 'اطلاعات بیشتر' }: { label?: strin
 export function PremiumProductOptions({
   productPrice,
   hasGuarantee,
-  isBoosted,
+  applyStrengthened,
   onGuaranteeChange,
+  onStrengthenedChange,
+  showStrengthened = true,
+  showBoost = false,
+  isBoosted = false,
   onBoostedChange,
 }: PremiumProductOptionsProps) {
   const guaranteeFee = getGuaranteeFee(productPrice);
@@ -82,14 +96,17 @@ export function PremiumProductOptions({
               <ReadMoreButton />
             </div>
           </div>
-          <DialogContent>
+          <DialogContent className="p-10">
             <DialogHeader>
-              <DialogTitle>تضمین فروشگاه</DialogTitle>
+              <DialogTitle>آگهی تضمین شده</DialogTitle>
               <DialogDescription asChild>
                 <div className="text-foreground space-y-3 text-start text-sm">
                   <p>
-                    با فعال‌سازی تضمین فروشگاه، محصول شما با نشان ویژه نمایش داده می‌شود و خریداران
-                    می‌توانند آن را مستقیماً از طریق سایت خریداری کنند.
+                    با فعال‌سازی تضمین فروشگاه، محصول شما با نشان ویژه دارای تضمین فروشگاه نمایش داده
+                    می‌شود و خریداران می‌توانند آن را مستقیماً با ضمانت فروشگاه از طریق سایت خریداری
+                    کنند. در این حالت مبلغ خرید به حساب فروشگاه واریز شده و پس از ارسال محصول توسط
+                    فروشنده و تایید خریدار مبلغ با کسر کارمزد فروشگاه و مالیات به حساب فروشنده واریز
+                    خواهد شد.
                   </p>
                   <p>
                     <strong>هزینه:</strong> معادل <strong>۵٪ قیمت فروش محصول</strong>
@@ -105,68 +122,105 @@ export function PremiumProductOptions({
                     <strong>فروش موفق محصول در وب‌سایت</strong> از شما دریافت می‌شود، نه هنگام ثبت
                     آگهی.
                   </p>
-                  <p className="text-muted-foreground text-xs">
-                    تا زمان فروش، هیچ هزینه‌ای بابت تضمین فروشگاه پرداخت نمی‌کنید.
-                  </p>
                 </div>
               </DialogDescription>
             </DialogHeader>
           </DialogContent>
         </Dialog>
 
-        <Dialog>
-          <div className="flex gap-3">
-            <Checkbox
-              id="is-boosted"
-              checked={isBoosted}
-              onCheckedChange={(checked) => onBoostedChange(checked === true)}
-              className="mt-0.5"
-            />
-            <div className="min-w-0 flex-1 space-y-1">
-              <Label
-                htmlFor="is-boosted"
-                className="flex cursor-pointer items-center gap-1 font-medium"
-              >
-                <TrendingUp className="size-4 text-amber-600" />
-                پله شده
-              </Label>
-              {isBoosted ? (
-                <p className="text-xs font-medium text-amber-700">
-                  هزینه هنگام ثبت آگهی: {formatPrice(BOOST_LISTING_FEE)} تومان
-                </p>
-              ) : (
-                <p className="text-muted-foreground text-xs">
-                  هزینه ثبت: {formatPrice(BOOST_LISTING_FEE)} تومان — هنگام کلیک روی «ثبت آگهی»
-                </p>
-              )}
-              <ReadMoreButton />
-            </div>
-          </div>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>آگهی پله‌شده</DialogTitle>
-              <DialogDescription asChild>
-                <div className="text-foreground space-y-3 text-start text-sm">
-                  <p>
-                    آگهی پله‌شده در بالای لیست محصولات و نتایج جستجو نمایش داده می‌شود و شانس دیده شدن
-                    آگهی شما بیشتر می‌شود.
+        {showStrengthened && (
+          <Dialog>
+            <div className="flex gap-3">
+              <Checkbox
+                id="apply-strengthened"
+                checked={applyStrengthened}
+                onCheckedChange={(checked) => onStrengthenedChange(checked === true)}
+                className="mt-0.5"
+              />
+              <div className="min-w-0 flex-1 space-y-1">
+                <Label
+                  htmlFor="apply-strengthened"
+                  className="flex cursor-pointer items-center gap-1 font-medium"
+                >
+                  <Sparkles className="size-4 text-violet-600" />
+                  تقویت شده
+                </Label>
+                {applyStrengthened ? (
+                  <p className="text-xs font-medium text-violet-700">
+                    هزینه هنگام ثبت آگهی: {formatPrice(STRENGTHENED_LISTING_FEE)} تومان
                   </p>
-                  <p>
-                    <strong>هزینه:</strong> <strong>{formatPrice(BOOST_LISTING_FEE)} تومان</strong>{' '}
-                    به‌صورت یک‌جا
-                  </p>
-                  <p>
-                    <strong>زمان پرداخت:</strong> پس از کلیک روی دکمه «ثبت آگهی»، پنجره پرداخت نمایش
-                    داده می‌شود و پس از تأیید پرداخت، آگهی با وضعیت پله‌شده ثبت می‌شود.
-                  </p>
+                ) : (
                   <p className="text-muted-foreground text-xs">
-                    در حال حاضر پرداخت به‌صورت شبیه‌سازی‌شده انجام می‌شود (بدون درگاه واقعی).
+                    هزینه: {formatPrice(STRENGTHENED_LISTING_FEE)} تومان —{' '}
+                    {STRENGTHENED_DURATION_DAYS} روز در بالای لیست
                   </p>
-                </div>
-              </DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
+                )}
+                <ReadMoreButton />
+              </div>
+            </div>
+            <DialogContent className="p-10">
+              <DialogHeader>
+                <DialogTitle>آگهی تقویت‌شده</DialogTitle>
+                <DialogDescription asChild>
+                  <div className="text-foreground space-y-3 text-start text-sm">
+                    <p>
+                      آگهی تقویت‌شده به مدت <strong>{STRENGTHENED_DURATION_DAYS} روز</strong> در
+                      بالای همه لیست‌ها می‌ماند، حتی اگر آگهی جدیدتری ثبت شود. پس از پایان این مدت،
+                      جایگاه آگهی بر اساس زمان انتشار عادی تعیین می‌شود.
+                    </p>
+                    <p>
+                      <strong>هزینه:</strong>{' '}
+                      <strong>{formatPrice(STRENGTHENED_LISTING_FEE)} تومان</strong>
+                    </p>
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {showBoost && onBoostedChange && (
+          <Dialog>
+            <div className="flex gap-3">
+              <Checkbox
+                id="is-boosted"
+                checked={isBoosted}
+                onCheckedChange={(checked) => onBoostedChange(checked === true)}
+                className="mt-0.5"
+              />
+              <div className="min-w-0 flex-1 space-y-1">
+                <Label
+                  htmlFor="is-boosted"
+                  className="flex cursor-pointer items-center gap-1 font-medium"
+                >
+                  <TrendingUp className="size-4 text-amber-600" />
+                  پله شده
+                </Label>
+                <p className="text-muted-foreground text-xs">
+                  هزینه: {formatPrice(BOOST_LISTING_FEE)} تومان — یک‌بار به بالای لیست
+                </p>
+                <ReadMoreButton />
+              </div>
+            </div>
+            <DialogContent className="p-10">
+              <DialogHeader>
+                <DialogTitle>آگهی پله‌شده</DialogTitle>
+                <DialogDescription asChild>
+                  <div className="text-foreground space-y-3 text-start text-sm">
+                    <p>
+                      آگهی پله‌شده یک‌بار به بالای لیست منتقل می‌شود و زمان انتشار (listedAt) به‌روز
+                      می‌شود.
+                    </p>
+                    <p>
+                      <strong>هزینه:</strong>{' '}
+                      <strong>{formatPrice(BOOST_LISTING_FEE)} تومان</strong>
+                    </p>
+                  </div>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        )}
       </CardContent>
     </Card>
   );

@@ -1,7 +1,5 @@
 /** Seed templates only — runtime data lives in the database; admin edits are not overwritten on sync. */
 
-export const MOTORCYCLE_ATV_SLUG = 'motorcycle-atv';
-
 export const MOTORCYCLE_ATV_NAME = 'چهارچرخ و موتورسیکلت';
 
 export const MOTORCYCLE_ATV_SUBCATEGORIES = [
@@ -10,8 +8,10 @@ export const MOTORCYCLE_ATV_SUBCATEGORIES = [
   { name: 'ادونچر و سفری', slug: 'adventure-touring', sortOrder: 3 },
 ] as const;
 
+export const MOTORCYCLE_ATV_SLUG = 'motorcycle-atv';
 export const LIBRARY_PARTS_SLUG = 'parts';
 export const LIBRARY_CAR_BRANDS_SLUG = 'car-brands';
+export const LIBRARY_CAMPING_SLUG = 'camping';
 
 export type DefaultLibraryKind = 'PART_TREE' | 'CAR_BRANDS';
 
@@ -31,6 +31,7 @@ export const DEFAULT_LIBRARIES: DefaultLibrary[] = [
     sortOrder: 2,
   },
   { slug: LIBRARY_CAR_BRANDS_SLUG, name: 'برند خودرو', kind: 'CAR_BRANDS', sortOrder: 3 },
+  { slug: LIBRARY_CAMPING_SLUG, name: 'لوازم کمپی', kind: 'PART_TREE', sortOrder: 4 },
 ];
 
 /** Top-level part groups (قطعات library). */
@@ -38,7 +39,7 @@ export const DEFAULT_PART_GROUPS = [
   { name: 'موتور و انتقال قدرت و دف', slug: 'engine-drivetrain', sortOrder: 1 },
   { name: 'شاسی و سیستم تعلیق و چرخ ها ', slug: 'chassis', sortOrder: 2 },
   { name: 'برق و روشنایی خودرو', slug: 'electrical', sortOrder: 3 },
-  { name: 'ظاهر و تجهیزات بدنه', slug: 'gear-style', sortOrder: 4 },
+  { name: 'ظاهر و تجهیزات بدنه و داخل خودرو', slug: 'gear-style', sortOrder: 4 },
   { name: 'سایر', slug: 'misc-group', sortOrder: 5 },
 ] as const;
 
@@ -46,15 +47,46 @@ export const DEFAULT_PART_GROUPS = [
 export const DEFAULT_PART_CHILDREN = [
   { name: 'تعلیق و زیربندی', slug: 'suspension', parentSlug: 'chassis', sortOrder: 1 },
   { name: 'رینگ و لاستیک', slug: 'tires-rims', parentSlug: 'chassis', sortOrder: 2 },
+  { name: 'سایر', slug: 'other-chassis', parentSlug: 'chassis', sortOrder: 3 },
   {
     name: 'پروژکتور و نور و لوازم برقی ',
     slug: 'lighting',
     parentSlug: 'electrical',
     sortOrder: 1,
   },
-  { name: 'راهنما و مسیریاب', slug: 'navigation', parentSlug: 'electrical', sortOrder: 2 },
+  {
+    name: 'مانیتورها و سیستم پخش و دوربین های خودرو',
+    slug: 'system-camera',
+    parentSlug: 'electrical',
+    sortOrder: 2,
+  },
+  { name: 'ردیاب و دزدگیر و مسیریاب', slug: 'navigation', parentSlug: 'electrical', sortOrder: 3 },
+  { name: 'سایر', slug: 'other-electrical', parentSlug: 'electrical', sortOrder: 4 },
   { name: 'اکسسوری و تزئینات', slug: 'accessories', parentSlug: 'gear-style', sortOrder: 1 },
-  { name: 'لباس و تجهیزات', slug: 'clothing-gear', parentSlug: 'gear-style', sortOrder: 2 },
+  { name: 'لوازم داخل خودرو', slug: 'inside', parentSlug: 'gear-style', sortOrder: 2 },
+  { name: 'لوازم ریکاوری خودرو', slug: 'recovery', parentSlug: 'gear-style', sortOrder: 3 },
+  {
+    name: 'سایه بان و چادر سقفی و چادر خودرو',
+    slug: 'car-tent',
+    parentSlug: 'gear-style',
+    sortOrder: 4,
+  },
+  {
+    name: 'سپرها و یدککش و تجهیزات لگن بار',
+    slug: 'spare-parts',
+    parentSlug: 'gear-style',
+    sortOrder: 5,
+  },
+  { name: 'سایر', slug: 'other-gear-style', parentSlug: 'gear-style', sortOrder: 6 },
+] as const;
+
+/** Top-level camping groups (کمپی library). */
+export const DEFAULT_CAMPING_GROUPS = [
+  { name: 'یخچال و بخاری و هیتر های مسافرتی', slug: 'heater-fridge', sortOrder: 1 },
+  { name: 'چادر و کیسه خواب و لباس های کمپی', slug: 'tent', sortOrder: 2 },
+  { name: 'لوازم روشنایی و بیسیم و مسیریاب', slug: 'directional-light', sortOrder: 3 },
+  { name: 'میز و صندلی و تخت سفری', slug: 'sit-bed', sortOrder: 4 },
+  { name: 'سایر', slug: 'other-camping', sortOrder: 5 },
 ] as const;
 
 /** Subgroups under the car-brands library (e.g. camper vehicles). */

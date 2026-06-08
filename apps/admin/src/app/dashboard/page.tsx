@@ -2,6 +2,7 @@
 
 import { formatPrice } from '@offroad/shared';
 import { Package, ShoppingCart, TrendingUp, Users } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/api';
 
@@ -12,7 +13,7 @@ export default function AdminDashboardPage() {
     adminApi
       .dashboard()
       .then(setData)
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   if (!data) {
@@ -70,9 +71,15 @@ export default function AdminDashboardPage() {
           <div className="space-y-3">
             {recentProducts.map((p: any) => (
               <div key={p.id} className="flex items-center gap-3 border-b pb-2 text-sm">
-                <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+                <div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
                   {p.images[0] ? (
-                    <img src={p.images[0]} alt="" className="h-full w-full object-cover" />
+                    <Image
+                      width={400}
+                      height={400}
+                      src={p.images[0]}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
                     <div className="flex h-full items-center justify-center text-xs text-gray-400">
                       بدون عکس
@@ -86,11 +93,10 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${
-                    p.status === 'ACTIVE'
+                  className={`rounded-full px-2 py-0.5 text-xs ${p.status === 'ACTIVE'
                       ? 'bg-green-100 text-green-700'
                       : 'bg-gray-100 text-gray-600'
-                  }`}
+                    }`}
                 >
                   {p.status === 'ACTIVE' ? 'فعال' : p.status}
                 </span>

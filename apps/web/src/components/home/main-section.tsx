@@ -1,6 +1,14 @@
 'use client';
 
-import { AlertCircle, Gavel, PackageSearch, Shield, Store, TrendingUp } from 'lucide-react';
+import {
+  AlertCircle,
+  Gavel,
+  PackageSearch,
+  Shield,
+  Sparkles,
+  Store,
+  TrendingUp,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { AuctionProductCard } from '@/components/auction/auction-product-card';
@@ -49,11 +57,20 @@ export default function MainSection() {
           </div>
         </div>
         <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
+          <Sparkles className="text-secondary h-10 w-10" />
+          <div>
+            <h3 className="font-bold">تقویت شده</h3>
+            <p className="text-muted-foreground mt-1 text-sm">
+              آگهی شما ۴ روز در بالای همه لیست‌ها می‌ماند، حتی با ثبت آگهی‌های جدید
+            </p>
+          </div>
+        </div>
+        <div className="bg-card flex items-start gap-4 rounded-lg border p-6">
           <TrendingUp className="text-secondary h-10 w-10" />
           <div>
             <h3 className="font-bold">پله شده</h3>
             <p className="text-muted-foreground mt-1 text-sm">
-              با فعال‌سازی گزینه پله، آگهی شما در بالای لیست نمایش داده می‌شود
+              یک‌بار به بالای لیست می‌رود و زمان انتشار آگهی به‌روز می‌شود
             </p>
           </div>
         </div>

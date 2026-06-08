@@ -6,6 +6,7 @@ import {
   dateTimeLocalToIso,
   defaultMinDateTimeLocal,
 } from '@/components/form/datetime-picker';
+import { FieldError } from '@/components/form/field-error';
 import { PriceInput } from '@/components/form/price-input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,9 +24,10 @@ export type AuctionListingFields = {
 type AuctionListingOptionsProps = {
   value: AuctionListingFields;
   onChange: (patch: Partial<AuctionListingFields>) => void;
+  errors?: Partial<Record<keyof AuctionListingFields, string | undefined>>;
 };
 
-export function AuctionListingOptions({ value, onChange }: AuctionListingOptionsProps) {
+export function AuctionListingOptions({ value, onChange, errors }: AuctionListingOptionsProps) {
   return (
     <Card className="border-violet-200/60 dark:border-violet-900/40">
       <CardHeader className="pb-3">
@@ -66,6 +68,7 @@ export function AuctionListingOptions({ value, onChange }: AuctionListingOptions
                 onChange={(v) => onChange({ auctionStartPrice: v })}
                 required
               />
+              <FieldError message={errors?.auctionStartPrice} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="buy-now">قیمت خرید فوری (تومان)</Label>
@@ -75,6 +78,7 @@ export function AuctionListingOptions({ value, onChange }: AuctionListingOptions
                 onChange={(v) => onChange({ buyNowPrice: v })}
                 required
               />
+              <FieldError message={errors?.buyNowPrice} />
               <p className="text-muted-foreground text-xs">
                 خریدار می‌تواند بدون شرکت در مزایده بخرد
               </p>
@@ -90,6 +94,7 @@ export function AuctionListingOptions({ value, onChange }: AuctionListingOptions
                 onChange={(v) => onChange({ realPriceMin: v })}
                 required
               />
+              <FieldError message={errors?.realPriceMin} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="real-max">حداکثر قیمت واقعی بازار (تومان)</Label>
@@ -99,16 +104,20 @@ export function AuctionListingOptions({ value, onChange }: AuctionListingOptions
                 onChange={(v) => onChange({ realPriceMax: v })}
                 required
               />
+              <FieldError message={errors?.realPriceMax} />
             </div>
           </div>
 
-          <DateTimePicker
-            value={value.auctionEndsAtLocal}
-            onChange={(v) => onChange({ auctionEndsAtLocal: v })}
-            min={defaultMinDateTimeLocal()}
-            required
-            hint="پس از این زمان، ثبت پیشنهاد جدید بسته می‌شود"
-          />
+          <div className="space-y-2">
+            <DateTimePicker
+              value={value.auctionEndsAtLocal}
+              onChange={(v) => onChange({ auctionEndsAtLocal: v })}
+              min={defaultMinDateTimeLocal()}
+              required
+              hint="پس از این زمان، ثبت پیشنهاد جدید بسته می‌شود"
+            />
+            <FieldError message={errors?.auctionEndsAtLocal} />
+          </div>
         </CardContent>
       )}
     </Card>

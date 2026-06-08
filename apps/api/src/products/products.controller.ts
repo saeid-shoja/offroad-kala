@@ -60,6 +60,16 @@ export class ProductsController {
     return this.productsService.reactivate(id, req.user.userId);
   }
 
+  @Post(':id/apply-strengthened')
+  applyStrengthened(@Param('id') id: string, @Request() req: { user: { userId: string } }) {
+    return this.productsService.applyStrengthened(id, req.user.userId);
+  }
+
+  @Post(':id/apply-boost')
+  applyBoost(@Param('id') id: string, @Request() req: { user: { userId: string } }) {
+    return this.productsService.applyBoost(id, req.user.userId);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string, @Request() req: { user: { userId: string; role: string } }) {
     return this.productsService.remove(id, req.user.userId, req.user.role);

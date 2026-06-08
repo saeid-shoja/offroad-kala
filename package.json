@@ -13,6 +13,8 @@
     "db:deploy": "pnpm --filter @offroad/api db:deploy",
     "db:push": "pnpm --filter @offroad/api db:push",
     "db:seed": "pnpm --filter @offroad/api db:seed",
+    "db:reset-categories": "pnpm --filter @offroad/api db:reset-categories",
+    "db:migrate:reset": "pnpm --filter @offroad/api db:migrate:reset",
     "db:studio": "pnpm --filter @offroad/api db:studio"
   },
   "devDependencies": {

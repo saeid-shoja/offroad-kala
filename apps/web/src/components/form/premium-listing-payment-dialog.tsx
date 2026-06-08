@@ -1,6 +1,6 @@
 'use client';
 
-import { BOOST_LISTING_FEE, formatPrice } from '@offroad/shared';
+import { formatPrice } from '@offroad/shared';
 import { CreditCard, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -13,39 +13,47 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-type BoostPaymentDialogProps = {
+type ListingPremiumPaymentDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void | Promise<void>;
   loading?: boolean;
+  title: string;
+  description: string;
+  fee: number;
+  confirmLabel?: string;
 };
 
-export function BoostPaymentDialog({
+export function ListingPremiumPaymentDialog({
   open,
   onOpenChange,
   onConfirm,
   loading = false,
-}: BoostPaymentDialogProps) {
+  title,
+  description,
+  fee,
+  confirmLabel,
+}: ListingPremiumPaymentDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="sm:max-w-md p-10"
+        className="p-10 sm:max-w-md"
         onPointerDownOutside={(e) => loading && e.preventDefault()}
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="size-5 text-amber-600" />
-            پرداخت هزینه پله‌شدن
+            {title}
           </DialogTitle>
           <DialogDescription asChild>
             <div className="text-foreground space-y-3 pt-2 text-start text-sm">
-              <p>برای ثبت آگهی با وضعیت «پله شده»، مبلغ زیر را پرداخت کنید:</p>
+              <p>{description}</p>
               <p className="text-primary text-2xl font-bold">
-                {formatPrice(BOOST_LISTING_FEE)}{' '}
+                {formatPrice(fee)}{' '}
                 <span className="text-muted-foreground text-base font-normal">تومان</span>
               </p>
               <p className="text-muted-foreground text-xs">
-                پرداخت شبیه‌سازی‌شده است. پس از تأیید، آگهی شما ثبت می‌شود.
+                پرداخت شبیه‌سازی‌شده است. پس از تأیید، تغییرات اعمال می‌شود.
               </p>
             </div>
           </DialogDescription>
@@ -66,7 +74,7 @@ export function BoostPaymentDialog({
                 در حال پرداخت...
               </>
             ) : (
-              `پرداخت ${formatPrice(BOOST_LISTING_FEE)} تومان`
+              (confirmLabel ?? `پرداخت ${formatPrice(fee)} تومان`)
             )}
           </Button>
         </DialogFooter>

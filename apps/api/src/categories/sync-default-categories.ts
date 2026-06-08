@@ -1,9 +1,11 @@
 import {
+  DEFAULT_CAMPING_GROUPS,
   DEFAULT_CAR_BRAND_SUBGROUPS,
   DEFAULT_CAR_BRANDS,
   DEFAULT_LIBRARIES,
   DEFAULT_PART_CHILDREN,
   DEFAULT_PART_GROUPS,
+  LIBRARY_CAMPING_SLUG,
   LIBRARY_CAR_BRANDS_SLUG,
   LIBRARY_PARTS_SLUG,
   MOTORCYCLE_ATV_SLUG,
@@ -11,19 +13,150 @@ import {
 } from '@offroad/shared';
 import type { CategoryGroup, LibraryKind, PrismaClient } from '../prisma/generated/client';
 
-// pick just needed models
 type Db = Pick<PrismaClient, 'library' | 'category' | 'product'>;
+
+type CategorySeed = {
+  slug: string;
+  name: string;
+  sortOrder: number;
+  group: CategoryGroup;
+  librarySlug: string;
+  parentSlug?: string | null;
+  brandCode?: string;
+};
+
+/** Retired slugs from older flat category lists — products are moved, then the row is removed. */
+const LEGACY_CATEGORY_SLUGS: {
+  from: string;
+  to: string;
+  group?: CategoryGroup;
+}[] = [
+  { from: 'clothing-gear', to: 'inside' },
+  { from: 'transmission', to: 'engine-drivetrain' },
+  { from: 'other', to: 'misc-group', group: 'PART' },
+];
+
+function buildCategorySeeds(): CategorySeed[] {
+  const seeds: CategorySeed[] = [
+    ...DEFAULT_PART_GROUPS.map((g) => ({
+      slug: g.slug,
+      name: g.name,
+      sortOrder: g.sortOrder,
+      group: 'PART' as CategoryGroup,
+      librarySlug: LIBRARY_PARTS_SLUG,
+      parentSlug: null,
+    })),
+    ...DEFAULT_PART_CHILDREN.map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      sortOrder: c.sortOrder,
+      group: 'PART' as CategoryGroup,
+      librarySlug: LIBRARY_PARTS_SLUG,
+      parentSlug: c.parentSlug,
+    })),
+    ...MOTORCYCLE_ATV_SUBCATEGORIES.map((s) => ({
+      slug: s.slug,
+      name: s.name,
+      sortOrder: s.sortOrder,
+      group: 'PART' as CategoryGroup,
+      librarySlug: MOTORCYCLE_ATV_SLUG,
+      parentSlug: null,
+    })),
+    ...DEFAULT_CAMPING_GROUPS.map((g) => ({
+      slug: g.slug,
+      name: g.name,
+      sortOrder: g.sortOrder,
+      group: 'PART' as CategoryGroup,
+      librarySlug: LIBRARY_CAMPING_SLUG,
+      parentSlug: null,
+    })),
+    ...DEFAULT_CAR_BRAND_SUBGROUPS.map((g) => ({
+      slug: g.slug,
+      name: g.name,
+      sortOrder: g.sortOrder,
+      group: 'CAR_BRAND' as CategoryGroup,
+      librarySlug: LIBRARY_CAR_BRANDS_SLUG,
+      parentSlug: null,
+    })),
+    ...DEFAULT_CAR_BRANDS.map((b) => ({
+      slug: b.slug,
+      name: b.name,
+      sortOrder: b.sortOrder,
+      group: 'CAR_BRAND' as CategoryGroup,
+      librarySlug: LIBRARY_CAR_BRANDS_SLUG,
+      parentSlug: b.parentSlug,
+      brandCode: b.code,
+    })),
+  ];
+
+  const seen = new Set<string>();
+  for (const seed of seeds) {
+    if (seen.has(seed.slug)) {
+      throw new Error(`Duplicate default category slug in category-defaults: ${seed.slug}`);
+    }
+    seen.add(seed.slug);
+  }
+
+  return seeds;
+}
+
+async function migrateLegacyCategorySlug(
+  db: Db,
+  from: string,
+  to: string,
+  group?: CategoryGroup,
+): Promise<void> {
+  const fromRow = await db.category.findFirst({
+    where: { slug: from, ...(group ? { group } : {}) },
+  });
+  if (!fromRow) return;
+
+  const toRow = await db.category.findUnique({ where: { slug: to } });
+  if (toRow) {
+    await db.product.updateMany({
+      where: { categoryId: fromRow.id },
+      data: { categoryId: toRow.id },
+    });
+  }
+
+  await db.category.delete({ where: { id: fromRow.id } });
+}
+
+async function removeLegacyMotorcycleGroupCategory(db: Db): Promise<void> {
+  const motorcycleSlugs = MOTORCYCLE_ATV_SUBCATEGORIES.map((s) => s.slug);
+  const legacyMotorcycleGroup = await db.category.findUnique({
+    where: { slug: MOTORCYCLE_ATV_SLUG },
+  });
+  if (!legacyMotorcycleGroup) return;
+
+  await db.category.updateMany({
+    where: { parentId: legacyMotorcycleGroup.id },
+    data: { parentId: null },
+  });
+
+  const fallbackSub = await db.category.findFirst({
+    where: { slug: { in: motorcycleSlugs } },
+  });
+  if (fallbackSub) {
+    await db.product.updateMany({
+      where: { categoryId: legacyMotorcycleGroup.id },
+      data: { categoryId: fallbackSub.id },
+    });
+  }
+
+  await db.category.delete({ where: { id: legacyMotorcycleGroup.id } });
+}
 
 /**
  * Seed-only sync — runs on API startup and `prisma seed`.
  *
  * - **Database is the runtime source of truth.** Shop, admin, and filters all read from DB.
  * - **category-defaults.ts** is a template for first install and new built-in slugs in deploys.
- * - Every upsert uses `update: {}` so existing rows are never overwritten (names, order, parents
- *   changed in admin stay as saved).
- * - Admin-created rows (`isSystem: false`) are never touched by this file.
- * - If a system default is deleted, it is re-created on next boot (by slug). Custom admin rows
- *   with new slugs are unaffected.
+ * - Each default slug is synced exactly once (parents before children).
+ * - **Existing rows are never updated** — admin edits (name, order, parent, library) always win.
+ * - Only missing slugs from category-defaults.ts are inserted (`isSystem: true`).
+ * - Rows with `isSystem: false` (admin-created or admin-edited) are never touched.
+ * - Retired slugs are migrated once, then removed.
  */
 export async function syncDefaultCategories(db: Db): Promise<void> {
   const libraryIds = new Map<string, string>();
@@ -43,152 +176,60 @@ export async function syncDefaultCategories(db: Db): Promise<void> {
     libraryIds.set(lib.slug, row.id);
   }
 
-  // use ! because we sure their exist
-  const partsLibraryId = libraryIds.get(LIBRARY_PARTS_SLUG)!;
-  const motorcycleLibraryId = libraryIds.get(MOTORCYCLE_ATV_SLUG)!;
+  await removeLegacyMotorcycleGroupCategory(db);
 
-  const groupIds = new Map<string, string>();
+  const categoryIds = new Map<string, string>();
+  const seeds = buildCategorySeeds();
 
-  for (const g of DEFAULT_PART_GROUPS) {
-    const row = await db.category.upsert({
-      where: { slug: g.slug },
-      create: {
-        name: g.name,
-        slug: g.slug,
-        group: 'PART' as CategoryGroup,
-        sortOrder: g.sortOrder,
-        parentId: null,
-        libraryId: partsLibraryId,
-        isSystem: true,
-      },
-      update: {},
-    });
-    groupIds.set(g.slug, row.id);
-  }
-
-  for (const sub of MOTORCYCLE_ATV_SUBCATEGORIES) {
-    await db.category.upsert({
-      where: { slug: sub.slug },
-      create: {
-        name: sub.name,
-        slug: sub.slug,
-        group: 'PART',
-        sortOrder: sub.sortOrder,
-        parentId: null,
-        libraryId: motorcycleLibraryId,
-        isSystem: true,
-      },
-      update: {},
-    });
-  }
-
-  const motorcycleSlugs = MOTORCYCLE_ATV_SUBCATEGORIES.map((s) => s.slug);
-  await db.category.updateMany({
-    where: { slug: { in: motorcycleSlugs } },
-    data: { parentId: null, libraryId: motorcycleLibraryId },
-  });
-
-  const legacyMotorcycleGroup = await db.category.findUnique({
-    where: { slug: MOTORCYCLE_ATV_SLUG },
-  });
-  if (legacyMotorcycleGroup) {
-    await db.category.updateMany({
-      where: { parentId: legacyMotorcycleGroup.id },
-      data: { parentId: null, libraryId: motorcycleLibraryId },
-    });
-
-    const fallbackSub = await db.category.findFirst({
-      where: { slug: { in: motorcycleSlugs } },
-    });
-    if (fallbackSub) {
-      await db.product.updateMany({
-        where: { categoryId: legacyMotorcycleGroup.id },
-        data: { categoryId: fallbackSub.id },
-      });
+  for (const seed of seeds) {
+    const libraryId = libraryIds.get(seed.librarySlug);
+    if (!libraryId) {
+      throw new Error(`Unknown library slug in category seed: ${seed.librarySlug}`);
     }
 
-    await db.category.delete({ where: { id: legacyMotorcycleGroup.id } });
+    const parentId = seed.parentSlug ? (categoryIds.get(seed.parentSlug) ?? null) : null;
+    const existing = await db.category.findUnique({ where: { slug: seed.slug } });
+
+    if (!existing) {
+      const row = await db.category.create({
+        data: {
+          name: seed.name,
+          slug: seed.slug,
+          group: seed.group,
+          sortOrder: seed.sortOrder,
+          parentId,
+          libraryId,
+          brandCode: seed.brandCode ?? null,
+          isSystem: true,
+        },
+      });
+      categoryIds.set(seed.slug, row.id);
+      continue;
+    }
+
+    categoryIds.set(seed.slug, existing.id);
   }
 
-  for (const cat of DEFAULT_PART_CHILDREN) {
-    const parentId = groupIds.get(cat.parentSlug);
-    await db.category.upsert({
-      where: { slug: cat.slug },
-      create: {
-        name: cat.name,
-        slug: cat.slug,
-        group: 'PART',
-        sortOrder: cat.sortOrder,
-        parentId: parentId ?? null,
-        libraryId: partsLibraryId,
-        isSystem: true,
-      },
-      update: {},
-    });
+  for (const { from, to, group } of LEGACY_CATEGORY_SLUGS) {
+    await migrateLegacyCategorySlug(db, from, to, group);
+  }
+}
+
+/**
+ * Wipe all libraries/categories and rebuild from category-defaults.ts.
+ * Fails when products exist (categoryId is required) — delete or reassign products first,
+ * or use `prisma migrate reset` for a full database wipe.
+ */
+export async function resetDefaultCategories(db: Db): Promise<void> {
+  const productCount = await db.product.count();
+  if (productCount > 0) {
+    throw new Error(
+      `${productCount} product(s) still reference categories. Delete products first, or run \`pnpm db:migrate:reset\` for a full database reset.`,
+    );
   }
 
-  const partSlugs = [
-    ...DEFAULT_PART_GROUPS.map((g) => g.slug),
-    ...DEFAULT_PART_CHILDREN.map((c) => c.slug),
-  ];
-  const motorcycleSlugList = [...motorcycleSlugs];
-
-  await db.category.updateMany({
-    where: { slug: { in: partSlugs }, libraryId: null },
-    data: { libraryId: partsLibraryId },
-  });
-  await db.category.updateMany({
-    where: { slug: { in: motorcycleSlugList }, libraryId: null },
-    data: { libraryId: motorcycleLibraryId },
-  });
-
-  const carBrandsLibraryId = libraryIds.get(LIBRARY_CAR_BRANDS_SLUG)!;
-  const carSubgroupIds = new Map<string, string>();
-
-  for (const subgroup of DEFAULT_CAR_BRAND_SUBGROUPS) {
-    const row = await db.category.upsert({
-      where: { slug: subgroup.slug },
-      create: {
-        name: subgroup.name,
-        slug: subgroup.slug,
-        group: 'CAR_BRAND',
-        sortOrder: subgroup.sortOrder,
-        parentId: null,
-        libraryId: carBrandsLibraryId,
-        isSystem: true,
-      },
-      update: {},
-    });
-    carSubgroupIds.set(subgroup.slug, row.id);
-  }
-
-  for (const brand of DEFAULT_CAR_BRANDS) {
-    const parentId = brand.parentSlug ? (carSubgroupIds.get(brand.parentSlug) ?? null) : null;
-    await db.category.upsert({
-      where: { slug: brand.slug },
-      create: {
-        name: brand.name,
-        slug: brand.slug,
-        brandCode: brand.code,
-        group: 'CAR_BRAND',
-        sortOrder: brand.sortOrder,
-        parentId,
-        libraryId: carBrandsLibraryId,
-        isSystem: true,
-      },
-      update: {},
-    });
-  }
-
-  const other = await db.category.findFirst({ where: { slug: 'other', group: 'PART' } });
-  const misc = await db.category.findUnique({ where: { slug: 'misc-group' } });
-  if (other && misc) {
-    await db.product.updateMany({
-      where: { categoryId: other.id },
-      data: { categoryId: misc.id },
-    });
-    await db.category.delete({ where: { id: other.id } });
-  } else if (other) {
-    await db.category.delete({ where: { id: other.id } });
-  }
+  await db.category.updateMany({ data: { parentId: null } });
+  await db.category.deleteMany();
+  await db.library.deleteMany();
+  await syncDefaultCategories(db);
 }

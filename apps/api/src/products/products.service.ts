@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { strengthenedEndsAt } from '@offroad/shared';
 import { CategoriesService } from '../categories/categories.service';
 import { getAuctionCurrentPrice, isAuctionActive } from '../common/auction';
 import { isPurchasableProduct } from '../common/purchasable';
@@ -63,10 +64,13 @@ export class ProductsService {
       activeUntil?: Date | null;
       deprecatedAt?: Date | null;
       listedAt?: Date;
+      strengthenedUntil?: Date | null;
       price: number;
       _count?: { auctionBids: number };
     },
   >(product: T) {
+    const strengthenedActive =
+      product.strengthenedUntil != null && product.strengthenedUntil.getTime() > Date.now();
     const brandLabels = await this.categoriesService.getCarBrandLabelMap();
     const brands = product.carBrands?.map((row) => row.brandCode) ?? [];
     const isAuction = Boolean(product.isAuction);
@@ -109,6 +113,8 @@ export class ProductsService {
       deprecatedAt: product.deprecatedAt,
       deletionAt: product.deprecatedAt ? computeDeletionAt(product.deprecatedAt) : null,
       listedAt: product.listedAt,
+      strengthenedUntil: product.strengthenedUntil,
+      isStrengthenedActive: strengthenedActive,
       auctionActive,
       bidCount: product._count?.auctionBids ?? 0,
       displayPrice: isAuction ? currentPrice : product.price,
@@ -121,6 +127,22 @@ export class ProductsService {
 
     delete mapped._count;
     return mapped;
+  }
+
+  private async expireStrengthenedProducts(): Promise<void> {
+    await this.prisma.product.updateMany({
+      where: { strengthenedUntil: { lt: new Date() } },
+      data: { strengthenedUntil: null },
+    });
+  }
+
+  private assertClientListingOwner(
+    product: { userId: string | null; advertiser: string },
+    userId: string,
+  ) {
+    if (product.advertiser !== 'CLIENT' || product.userId !== userId) {
+      throw new ForbiddenException('شما اجازه تغییر این آگهی را ندارید');
+    }
   }
 
   async findAll(params: {
@@ -218,7 +240,12 @@ export class ProductsService {
       where.auctionEndsAt = { gt: new Date() };
     }
 
-    const orderBy: any = [{ listedAt: 'desc' }];
+    await this.expireStrengthenedProducts();
+
+    const orderBy: any = [
+      { strengthenedUntil: { sort: 'desc', nulls: 'last' } },
+      { listedAt: 'desc' },
+    ];
 
     const [products, total] = await Promise.all([
       this.prisma.product.findMany({
@@ -293,6 +320,7 @@ export class ProductsService {
         categoryId: data.categoryId,
         hasGuarantee: data.isAuction ? false : data.hasGuarantee || false,
         isBoosted: data.isBoosted || false,
+        strengthenedUntil: data.applyStrengthened ? strengthenedEndsAt() : null,
         city: data.city,
         phone: data.isAuction ? undefined : data.phone,
         advertiser: data.advertiser ?? 'CLIENT',
@@ -347,6 +375,45 @@ export class ProductsService {
     const updated = await this.prisma.product.update({
       where: { id },
       data: updateData,
+      include: productIncludeDetail,
+    });
+    return this.mapProduct(updated);
+  }
+
+  async applyStrengthened(id: string, userId: string) {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product) throw new NotFoundException('محصول یافت نشد');
+    this.assertClientListingOwner(product, userId);
+    if (product.status !== 'ACTIVE') {
+      throw new BadRequestException('فقط آگهی‌های فعال قابل تقویت هستند');
+    }
+    if (product.isAuction) {
+      throw new BadRequestException('مزایده‌ها قابل تقویت نیستند');
+    }
+
+    const updated = await this.prisma.product.update({
+      where: { id },
+      data: { strengthenedUntil: strengthenedEndsAt() },
+      include: productIncludeDetail,
+    });
+    return this.mapProduct(updated);
+  }
+
+  async applyBoost(id: string, userId: string) {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product) throw new NotFoundException('محصول یافت نشد');
+    this.assertClientListingOwner(product, userId);
+    if (product.status !== 'ACTIVE') {
+      throw new BadRequestException('فقط آگهی‌های فعال قابل پله‌شدن هستند');
+    }
+    if (product.isAuction) {
+      throw new BadRequestException('مزایده‌ها قابل پله‌شدن نیستند');
+    }
+
+    const now = new Date();
+    const updated = await this.prisma.product.update({
+      where: { id },
+      data: { isBoosted: true, listedAt: now },
       include: productIncludeDetail,
     });
     return this.mapProduct(updated);

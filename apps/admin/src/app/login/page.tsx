@@ -32,8 +32,11 @@ export default function AdminLoginPage() {
         <h1 className="mb-6 text-center text-2xl font-bold">ورود مدیر</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm">شماره موبایل</label>
+            <label htmlFor="admin-phone" className="mb-1 block text-sm">
+              شماره موبایل
+            </label>
             <input
+              id="admin-phone"
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -42,8 +45,11 @@ export default function AdminLoginPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm">رمز عبور</label>
+            <label htmlFor="admin-password" className="mb-1 block text-sm">
+              رمز عبور
+            </label>
             <PasswordInput
+              id="admin-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="px-4"

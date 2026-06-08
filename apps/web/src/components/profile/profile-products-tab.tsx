@@ -4,6 +4,7 @@ import { PackageSearch, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { ProductListingPremiumActions } from '@/components/profile/product-listing-premium-actions';
 import { ProductCard } from '@/components/shop/product-card';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
@@ -69,6 +70,7 @@ export function ProfileProductsTab({ enabled }: ProfileProductsTabProps) {
       {products.map((product: any) => (
         <div key={product.id} className="flex flex-col gap-2">
           <ProductCard product={product} />
+          <ProductListingPremiumActions product={product} onUpdated={loadProducts} />
           {product.status === 'DEPRECATED' && (
             <div className="space-y-1 px-1">
               {product.deletionAt && (
