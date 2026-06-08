@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Mail } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';

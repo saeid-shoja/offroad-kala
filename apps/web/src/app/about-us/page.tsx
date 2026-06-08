@@ -30,7 +30,7 @@ export default function AboutUsPage() {
         ))}
       </section>
       <div className="w-full center">
-        <SiteLogo size="lg" imageClassName='w-full h-120 lg:min-w-md' />
+        <SiteLogo size="lg" imageClassName="w-full h-120 lg:min-w-md" />
       </div>
     </div>
   );

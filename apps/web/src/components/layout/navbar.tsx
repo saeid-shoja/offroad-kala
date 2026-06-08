@@ -43,7 +43,7 @@ export function Navbar() {
               </Link>
               <CategoriesNavDropdown />
               <LocationPicker />
-              <Button asChild className='rounded-md'>
+              <Button asChild className="rounded-md">
                 <Link href="/products/new">
                   ثبت آگهی
                   <PlusCircle className="h-5 w-5" />
@@ -52,7 +52,6 @@ export function Navbar() {
               <NavbarSearch className="hidden max-w-md min-w-sm md:flex" />
             </div>
           </div>
-
 
           <div className="hidden items-center gap-2 md:flex">
             <CartNavButton />
