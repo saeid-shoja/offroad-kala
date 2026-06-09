@@ -1,36 +1,35 @@
 'use client';
 
-import Link from 'next/link';
+import { MOTORCYCLE_ATV_SLUG } from '@offroad/shared';
 import { ChevronDown, ChevronLeft, LayoutGrid, Loader2 } from 'lucide-react';
-
-import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { useCategories, type LibraryNode } from '@/providers/categories-provider';
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarSub,
+  MenubarSubContent,
+  MenubarSubTrigger,
+  MenubarTrigger,
+} from '@/components/ui/menubar';
 import { getLibraryNodeHref } from '@/lib/library-links';
 import { cn } from '@/lib/utils';
+import { type LibraryNode, useCategories } from '@/stores/categories-store';
 
 /** Shared row size for parent + submenu panels */
 export const LIBRARY_MENU_WIDTH = 'w-66';
-const MENU_ROW =
-  'flex h-10 w-66 items-center justify-between gap-2 px-3 text-sm outline-none';
-const SUBMENU_PANEL = cn(
-  LIBRARY_MENU_WIDTH,
-  'min-w-66 overflow-y-auto p-1 shadow-lg',
-);
+const MENU_ROW = 'flex h-10 w-64 items-center justify-between gap-2 px-3 text-sm outline-none';
+const SUBMENU_PANEL = cn(LIBRARY_MENU_WIDTH, 'min-w-62 overflow-y-auto p-1 shadow-lg');
+
+/** Chevron on the left, label on the right (RTL) */
+const MENU_ROW_RTL = cn(MENU_ROW, '[&>svg]:shrink-0');
+
+/** Mobile sidebar: icon visually left, Persian label visually right */
+const MOBILE_MENU_ROW_RTL = cn(MENU_ROW, 'w-full flex-row-reverse [&>svg]:shrink-0');
+const MOBILE_MENU_ROW_TEXT = cn(MENU_ROW, 'w-full');
 
 type CategoriesNavDropdownProps = {
   className?: string;
@@ -60,113 +59,126 @@ function MenuLinkRow({
   );
 }
 
-/** Desktop: subgroup opens to the left of parent, same width/height */
+function SubmenuTriggerLabel({ name }: { name: string }) {
+  return (
+    <>
+      <ChevronLeft className="size-4 opacity-70" />
+      <span className="flex-1 truncate text-end">{name}</span>
+    </>
+  );
+}
+
+/** Desktop: subgroup opens to the left of parent */
 function PartGroupSubmenuDesktop({ group }: { group: LibraryNode }) {
   if (group.children.length === 0) {
     return (
-      <DropdownMenuItem asChild className="p-0 focus:bg-transparent">
+      <MenubarItem asChild className="focus:bg-transparent flex justify-end px-3">
         <MenuLinkRow href={getLibraryNodeHref(group)}>{group.name}</MenuLinkRow>
-      </DropdownMenuItem>
+      </MenubarItem>
     );
   }
 
   return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger
-        className={cn(MENU_ROW, 'cursor-pointer rounded-sm data-[state=open]:bg-accent')}
+    <MenubarSub>
+      <MenubarSubTrigger
+        className={cn(MENU_ROW_RTL, 'cursor-pointer rounded-sm data-[state=open]:bg-accent')}
       >
-        <span className="flex-1 truncate text-start">{group.name}</span>
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className={SUBMENU_PANEL}>
+        <SubmenuTriggerLabel name={group.name} />
+      </MenubarSubTrigger>
+      <MenubarSubContent className={SUBMENU_PANEL}>
         {group.children.map((sub) => (
-          <DropdownMenuItem key={sub.id} asChild className="p-0 focus:bg-transparent">
+          <MenubarItem
+            key={sub.id}
+            asChild
+            className="p-0 focus:bg-transparent flex justify-end px-3"
+          >
             <MenuLinkRow href={getLibraryNodeHref(sub)}>{sub.name}</MenuLinkRow>
-          </DropdownMenuItem>
+          </MenubarItem>
         ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className="p-0 focus:bg-transparent">
-          <MenuLinkRow href={getLibraryNodeHref(group)} className="text-xs">
+        <MenubarSeparator />
+        <MenubarItem asChild className="p-0 focus:bg-transparent flex justify-end px-3">
+          <MenuLinkRow href={getLibraryNodeHref(group)} className="font-bold">
             همه {group.name}
           </MenuLinkRow>
-        </DropdownMenuItem>
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
+        </MenubarItem>
+      </MenubarSubContent>
+    </MenubarSub>
   );
 }
 
 function LibrarySubmenuDesktop({ library }: { library: LibraryNode }) {
-  const isFlat =
-    library.kind === 'CAR_BRAND' ||
-    (library.slug === 'motorcycle-atv' && library.children.every((c) => c.children.length === 0));
-
+  const isFlat = library.children.every((c) => c.children.length === 0);
   return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger
-        className={cn(MENU_ROW, 'cursor-pointer rounded-sm font-medium data-[state=open]:bg-accent')}
+    <MenubarSub>
+      <MenubarSubTrigger
+        className={cn(
+          MENU_ROW_RTL,
+          'cursor-pointer rounded-sm font-medium data-[state=open]:bg-accent',
+        )}
       >
-        <span className="flex-1 truncate text-start">{library.name}</span>
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className={SUBMENU_PANEL}>
+        <SubmenuTriggerLabel name={library.name} />
+      </MenubarSubTrigger>
+      <MenubarSubContent className={SUBMENU_PANEL}>
         {isFlat
           ? library.children.map((item) => (
-            <DropdownMenuItem key={item.id} asChild className="p-0 focus:bg-transparent">
-              <MenuLinkRow href={getLibraryNodeHref(item)}>{item.name}</MenuLinkRow>
-            </DropdownMenuItem>
-          ))
+              <MenubarItem key={item.id} asChild className="p-0 focus:bg-transparent">
+                <MenuLinkRow className="flex justify-end pr-3" href={getLibraryNodeHref(item)}>
+                  {item.name}
+                </MenuLinkRow>
+              </MenubarItem>
+            ))
           : library.children.map((group) => (
-            <PartGroupSubmenuDesktop key={group.id} group={group} />
-          ))}
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
+              <PartGroupSubmenuDesktop key={group.id} group={group} />
+            ))}
+      </MenubarSubContent>
+    </MenubarSub>
   );
 }
 
-export function CategoriesNavDropdown({
-  className,
-  triggerClassName,
-}: CategoriesNavDropdownProps) {
+export function CategoriesNavDropdown({ className, triggerClassName }: CategoriesNavDropdownProps) {
   const { libraries, loading, error } = useCategories();
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
+    <Menubar className="h-auto border-0 bg-card p-0 shadow-none">
+      <MenubarMenu>
+        <MenubarTrigger
           className={cn(
-            'text-muted-foreground hover:text-primary h-auto gap-1 px-2 py-1.5 text-sm font-normal',
+            'text-muted-foreground hover:text-primary data-[state=open]:text-primary h-auto gap-2 px-2 py-1.5 text-sm font-normal',
+            MENU_ROW_RTL,
             triggerClassName,
+            'w-32',
           )}
         >
-          دسته بندی
+          <span className="text-end">دسته بندی</span>
           <ChevronDown className="size-4 opacity-70" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className={cn(LIBRARY_MENU_WIDTH, 'p-1', className)}>
-        {loading ? (
-          <div className="text-muted-foreground flex h-10 w-56 items-center justify-center gap-2 text-sm">
-            <Loader2 className="size-4 animate-spin" />
-            در حال بارگذاری...
-          </div>
-        ) : error ? (
-          <p className="text-destructive px-3 py-3 text-center text-xs leading-relaxed">{error}</p>
-        ) : libraries.length === 0 ? (
-          <p className="text-muted-foreground flex h-10 w-56 items-center justify-center text-sm">
-            دسته بندی ای یافت نشد
-          </p>
-        ) : (
-          libraries.map((library) => (
-            <LibrarySubmenuDesktop key={library.id} library={library} />
-          ))
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className="px-5 focus:bg-transparent cursor-pointer">
-          <MenuLinkRow href="/categories">
-            <LayoutGrid className="size-4 shrink-0" />
-            <span>همه دسته‌بندی‌ها</span>
-          </MenuLinkRow>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </MenubarTrigger>
+        <MenubarContent align="start" className={cn(LIBRARY_MENU_WIDTH, 'p-1', className)}>
+          {loading ? (
+            <div className="text-muted-foreground flex h-10 w-56 items-center justify-center gap-2 text-sm">
+              <Loader2 className="size-4 animate-spin" />
+              در حال بارگذاری...
+            </div>
+          ) : error ? (
+            <p className="text-destructive px-3 py-3 text-center text-xs leading-relaxed">
+              {error}
+            </p>
+          ) : libraries.length === 0 ? (
+            <p className="text-muted-foreground flex h-10 w-56 items-center justify-center text-sm">
+              دسته بندی ای یافت نشد
+            </p>
+          ) : (
+            libraries.map((library) => <LibrarySubmenuDesktop key={library.id} library={library} />)
+          )}
+          <MenubarSeparator />
+          <MenubarItem asChild className="cursor-pointer px-4 focus:bg-transparent">
+            <MenuLinkRow href="/categories">
+              <LayoutGrid className="size-4 shrink-0" />
+              <span className="flex-1 text-end">همه دسته‌بندی‌ها</span>
+            </MenuLinkRow>
+          </MenubarItem>
+        </MenubarContent>
+      </MenubarMenu>
+    </Menubar>
   );
 }
 
@@ -183,7 +195,7 @@ function MobileGroupSection({
       <Link
         href={getLibraryNodeHref(group)}
         onClick={onNavigate}
-        className={cn(MENU_ROW, 'hover:bg-accent w-full rounded-lg')}
+        className={cn(MOBILE_MENU_ROW_TEXT, 'hover:bg-accent rounded-sm')}
       >
         {group.name}
       </Link>
@@ -194,12 +206,12 @@ function MobileGroupSection({
     <Collapsible className="w-full">
       <CollapsibleTrigger
         className={cn(
-          MENU_ROW,
-          'hover:bg-accent w-full rounded-lg font-medium [&[data-state=open]>svg]:rotate-180',
+          MOBILE_MENU_ROW_RTL,
+          'hover:bg-accent rounded-sm font-medium [&[data-state=open]>svg:first-child]:-rotate-90',
         )}
       >
+        <ChevronDown className="size-4 opacity-70 transition-transform" />
         <span className="flex-1 truncate text-start">{group.name}</span>
-        <ChevronDown className="size-4 shrink-0 opacity-70 transition-transform" />
       </CollapsibleTrigger>
       <CollapsibleContent className="border-border/60 mr-2 space-y-0.5 border-r-2 pr-2">
         {group.children.map((sub) => (
@@ -207,7 +219,7 @@ function MobileGroupSection({
             key={sub.id}
             href={getLibraryNodeHref(sub)}
             onClick={onNavigate}
-            className={cn(MENU_ROW, 'hover:bg-accent w-full rounded-lg')}
+            className={cn(MOBILE_MENU_ROW_TEXT, 'hover:bg-accent rounded-sm')}
           >
             {sub.name}
           </Link>
@@ -215,7 +227,10 @@ function MobileGroupSection({
         <Link
           href={getLibraryNodeHref(group)}
           onClick={onNavigate}
-          className={cn(MENU_ROW, 'text-muted-foreground hover:bg-accent w-full rounded-lg text-xs')}
+          className={cn(
+            MOBILE_MENU_ROW_TEXT,
+            'text-muted-foreground hover:bg-accent rounded-sm text-xs',
+          )}
         >
           همه {group.name}
         </Link>
@@ -224,7 +239,6 @@ function MobileGroupSection({
   );
 }
 
-// mobile
 function MobileLibrarySection({
   library,
   onNavigate,
@@ -233,15 +247,15 @@ function MobileLibrarySection({
   onNavigate?: () => void;
 }) {
   const isFlat =
-    library.kind === 'CAR_BRAND' ||
-    (library.slug === 'motorcycle-atv' && library.children.every((c) => c.children.length === 0));
+    library.children.every((c) => c.children.length === 0) &&
+    (library.kind === 'CAR_BRAND' || library.slug === MOTORCYCLE_ATV_SLUG);
 
   return (
     <Collapsible className="mb-1 w-full">
       <CollapsibleTrigger
         className={cn(
-          MENU_ROW,
-          'hover:bg-accent w-full rounded-lg font-semibold [&[data-state=open]>svg]:rotate-180',
+          MENU_ROW_RTL,
+          'hover:bg-accent w-full rounded-sm font-semibold [&[data-state=open]>svg:first-child]:-rotate-90',
         )}
       >
         <span className="flex-1 truncate text-start">{library.name}</span>
@@ -250,18 +264,18 @@ function MobileLibrarySection({
       <CollapsibleContent className="border-border/60 mr-2 space-y-0.5 border-r-2 pr-2">
         {isFlat
           ? library.children.map((item) => (
-            <Link
-              key={item.id}
-              href={getLibraryNodeHref(item)}
-              onClick={onNavigate}
-              className={cn(MENU_ROW, 'hover:bg-accent w-full rounded-md')}
-            >
-              {item.name}
-            </Link>
-          ))
+              <Link
+                key={item.id}
+                href={getLibraryNodeHref(item)}
+                onClick={onNavigate}
+                className={cn(MENU_ROW, 'hover:bg-accent w-full rounded-sm')}
+              >
+                {item.name}
+              </Link>
+            ))
           : library.children.map((group) => (
-            <MobileGroupSection key={group.id} group={group} onNavigate={onNavigate} />
-          ))}
+              <MobileGroupSection key={group.id} group={group} onNavigate={onNavigate} />
+            ))}
       </CollapsibleContent>
     </Collapsible>
   );
@@ -271,9 +285,7 @@ export function CategoriesNavLinks({ onNavigate }: { onNavigate?: () => void }) 
   const { libraries, loading, error } = useCategories();
 
   if (loading) {
-    return (
-      <p className="text-muted-foreground px-3 py-2 text-sm">در حال بارگذاری...</p>
-    );
+    return <p className="text-muted-foreground px-3 py-2 text-sm">در حال بارگذاری...</p>;
   }
 
   if (error) {
@@ -289,7 +301,7 @@ export function CategoriesNavLinks({ onNavigate }: { onNavigate?: () => void }) 
       <Link
         href="/categories"
         onClick={onNavigate}
-        className={cn(MENU_ROW, 'text-primary hover:bg-accent mt-1 w-full rounded-lg font-medium')}
+        className={cn(MENU_ROW, 'text-primary hover:bg-accent mt-1 w-full rounded-sm font-medium')}
       >
         همه دسته‌بندی‌ها
       </Link>

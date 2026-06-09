@@ -7,12 +7,14 @@
     "build": "nest build",
     "start": "nest start",
     "start:prod": "node dist/main",
-    "lint": "echo 'lint ok'",
+    "lint": "biome check .",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
+    "db:reset-categories": "tsx prisma/reset-categories.ts",
+    "db:migrate:reset": "prisma migrate reset",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
   },
@@ -22,6 +24,7 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.0",
     "@nestjs/platform-express": "^11.1.0",
+    "@offroad/shared": "workspace:*",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "bcryptjs": "^2.4.3",
@@ -32,6 +35,7 @@
     "passport-jwt": "^4.0.1",
     "pg": "^8.13.1",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.12.4",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {

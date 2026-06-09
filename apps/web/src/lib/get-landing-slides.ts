@@ -1,3 +1,4 @@
+import { SITE_NAME_FA } from '@offroad/shared';
 import { api } from '@/lib/api';
 
 export type Slide = {
@@ -13,28 +14,44 @@ export type Slide = {
 export const MOCK_SLIDES: Slide[] = [
   {
     id: '1',
-    imageUrl:
-      'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=1920&q=80',
-    title: 'آفرود شاپ | فروشگاه تخصصی لوازم آفرود',
+    imageUrl: '/images/hero/s1.webp',
+    title: `${SITE_NAME_FA} | فروشگاه تخصصی لوازم آفرود`,
     description: 'خرید و فروش لوازم و تجهیزات آفرود با ضمانت اصالت کالا',
     link: '/products',
-    linkLabel: 'بازارچه آفرود',
+    linkLabel: `فروشگاه ${SITE_NAME_FA}`,
   },
   {
     id: '2',
-    imageUrl:
-      'https://images.unsplash.com/photo-1516738901171-8eb4ec13bd37?w=1920&q=80',
-    title: 'تجهیزات حرفه‌ای برای مسیرهای سخت',
-    description: 'لاستیک، لیفت کیت، بردگارد و قطعات اورجینال',
+    imageUrl: '/images/hero/s2.jpg',
+    title: 'دسته بندی های مختلف تجهیزات آفرودی دست دوم',
+    description:
+      'لاستیک، لیفت کیت، تجهیزات بدنه و قطعات اورجینال  با قیمت های متنوع رو تو دسته بندی های مشخص پیدا کن',
     link: '/categories',
     linkLabel: 'دسته‌بندی‌ها',
   },
   {
     id: '3',
-    imageUrl:
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80',
-    title: 'آگهی خود را ثبت کنید',
-    description: 'مانند بازارچه، محصول دست‌دوم خود را بفروشید',
+    imageUrl: '/images/hero/s3.jpg',
+    title: 'تجهیزات آفرودی دست دومت رو با ثبت آگهی بفروش',
+    description: `در ${SITE_NAME_FA}، محصول دست‌دوم خود را بفروشید`,
+    link: '/products/new',
+    linkLabel: 'ثبت آگهی',
+  },
+  {
+    id: '4',
+    imageUrl: '/images/hero/s4.jpeg',
+    title: 'آگهی خودتو به صورت مزایده ثبت کن',
+    description:
+      'میتونی با برگزاری یک مزایده توی یک بازه مشخص به بالاترین قیمت محصول دست‌دوم خودتو بفروشی',
+    link: '/auctions',
+    linkLabel: 'مزایده ها',
+  },
+  {
+    id: '5',
+    imageUrl: '/images/hero/s5.webp',
+    title: 'تجهیزاتت رو با تضمین فروشگاه بفروش',
+    description:
+      'با فعال کردن حالت تضمین فروشگاه ما واسطه معامله شما و خریدار میشیم تا معامله با خیال راحت تر از راه دور انجام بشه',
     link: '/products/new',
     linkLabel: 'ثبت آگهی',
   },

@@ -1,9 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { ProductsService } from '../products/products.service';
+import type { UpdateProfileDto } from './dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private productsService: ProductsService,
+  ) {}
 
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
@@ -23,14 +28,15 @@ export class UsersService {
   }
 
   async getUserProducts(userId: string) {
-    return this.prisma.product.findMany({
-      where: { userId, type: 'CLIENT' },
-      include: { category: true },
-      orderBy: { createdAt: 'desc' },
+    const products = await this.prisma.product.findMany({
+      where: { userId, advertiser: 'CLIENT' },
+      include: { category: true, carBrands: true },
+      orderBy: { listedAt: 'desc' },
     });
+    return Promise.all(products.map((product) => this.productsService.mapProduct(product)));
   }
 
-  async updateProfile(userId: string, data: { name?: string; city?: string }) {
+  async updateProfile(userId: string, data: UpdateProfileDto) {
     return this.prisma.user.update({
       where: { id: userId },
       data,

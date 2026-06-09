@@ -1,7 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { CategoryGroup, LibraryKind } from '../prisma/generated/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CategoryGroup } from '../prisma/generated/client';
-import { getCarBrandOptions } from '../common/car-brands';
+import type {
+  CreateCategoryDto,
+  CreateLibraryDto,
+  UpdateCategoryDto,
+  UpdateLibraryDto,
+} from './dto';
 
 export type LibraryNode = {
   id: string;
@@ -11,22 +16,21 @@ export type LibraryNode = {
   children: LibraryNode[];
 };
 
-const MOTORCYCLE_ATV_SLUG = 'motorcycle-atv';
+type CategoryRow = {
+  id: string;
+  name: string;
+  slug: string;
+  brandCode: string | null;
+  parentId: string | null;
+  sortOrder: number;
+};
 
 @Injectable()
 export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
-  private buildPartTree(
-    categories: {
-      id: string;
-      name: string;
-      slug: string;
-      parentId: string | null;
-      sortOrder: number;
-    }[],
-  ): LibraryNode[] {
-    const byParent = new Map<string | null, typeof categories>();
+  private buildPartTree(categories: CategoryRow[]): LibraryNode[] {
+    const byParent = new Map<string | null, CategoryRow[]>();
     for (const cat of categories) {
       const key = cat.parentId;
       if (!byParent.has(key)) byParent.set(key, []);
@@ -36,7 +40,7 @@ export class CategoriesService {
       list.sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'fa'));
     }
 
-    const toNode = (cat: (typeof categories)[0]): LibraryNode => ({
+    const toNode = (cat: CategoryRow): LibraryNode => ({
       id: cat.id,
       name: cat.name,
       slug: cat.slug,
@@ -47,79 +51,135 @@ export class CategoriesService {
     return (byParent.get(null) ?? []).map(toNode);
   }
 
-  async findAll() {
-    const parts = await this.prisma.category.findMany({
-      where: { group: CategoryGroup.PART },
-      include: { _count: { select: { products: true } } },
+  private buildCarBrandTree(categories: CategoryRow[]): LibraryNode[] {
+    const byParent = new Map<string | null, CategoryRow[]>();
+    for (const cat of categories) {
+      const key = cat.parentId;
+      if (!byParent.has(key)) byParent.set(key, []);
+      byParent.get(key)!.push(cat);
+    }
+    for (const list of byParent.values()) {
+      list.sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'fa'));
+    }
+
+    const toNode = (cat: CategoryRow): LibraryNode => {
+      const childRows = byParent.get(cat.id) ?? [];
+      if (cat.brandCode) {
+        return {
+          id: cat.brandCode,
+          name: cat.name,
+          slug: cat.slug,
+          kind: 'CAR_BRAND',
+          children: [],
+        };
+      }
+      return {
+        id: cat.id,
+        name: cat.name,
+        slug: cat.slug,
+        kind: 'PART',
+        children: childRows.map(toNode),
+      };
+    };
+
+    return (byParent.get(null) ?? []).map(toNode);
+  }
+
+  async getCarBrandOptions() {
+    const brands = await this.prisma.category.findMany({
+      where: { group: CategoryGroup.CAR_BRAND, brandCode: { not: null } },
       orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      select: { brandCode: true, name: true },
+    });
+    return brands.map((b) => ({
+      value: b.brandCode!,
+      label: b.name,
+    }));
+  }
+
+  async getCarBrandLabelMap(): Promise<Map<string, string>> {
+    const brands = await this.prisma.category.findMany({
+      where: { group: CategoryGroup.CAR_BRAND, brandCode: { not: null } },
+      select: { brandCode: true, name: true },
+    });
+    return new Map(brands.map((b) => [b.brandCode!, b.name]));
+  }
+
+  async parseCarBrandCodes(codes?: string[]): Promise<string[]> {
+    if (!codes?.length) return [];
+    const unique = [...new Set(codes.map((c) => c.trim().toUpperCase()).filter(Boolean))];
+    const existing = await this.prisma.category.findMany({
+      where: { brandCode: { in: unique } },
+      select: { brandCode: true },
+    });
+    const valid = new Set(existing.map((b) => b.brandCode!));
+    const invalid = unique.filter((c) => !valid.has(c));
+    if (invalid.length > 0) {
+      throw new BadRequestException('برند خودرو نامعتبر است. فقط از لیست مجاز انتخاب کنید.');
+    }
+    return unique;
+  }
+
+  async findAll() {
+    const [libraries, parts, carBrandCategories, carBrands] = await Promise.all([
+      this.prisma.library.findMany({ orderBy: { sortOrder: 'asc' } }),
+      this.prisma.category.findMany({
+        where: { group: CategoryGroup.PART },
+        include: { _count: { select: { products: true } } },
+        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      }),
+      this.prisma.category.findMany({
+        where: { group: CategoryGroup.CAR_BRAND },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          brandCode: true,
+          parentId: true,
+          sortOrder: true,
+          libraryId: true,
+        },
+        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      }),
+      this.getCarBrandOptions(),
+    ]);
+
+    const libraryNodes: LibraryNode[] = libraries.map((lib) => {
+      if (lib.kind === LibraryKind.CAR_BRANDS) {
+        const libCategories = carBrandCategories.filter((c) => c.libraryId === lib.id);
+        return {
+          id: lib.id,
+          name: lib.name,
+          slug: lib.slug,
+          kind: 'CAR_BRAND' as const,
+          children: this.buildCarBrandTree(libCategories),
+        };
+      }
+
+      const libCategories = parts.filter((p) => p.libraryId === lib.id);
+      return {
+        id: lib.id,
+        name: lib.name,
+        slug: lib.slug,
+        kind: 'PART' as const,
+        children: this.buildPartTree(libCategories),
+      };
     });
 
-    const motorcycleCat = parts.find((p) => p.slug === MOTORCYCLE_ATV_SLUG);
-    const motorcycleId = motorcycleCat?.id;
-
-    const partsForMainTree = parts.filter(
-      (p) => p.slug !== MOTORCYCLE_ATV_SLUG && p.parentId !== motorcycleId,
-    );
-    const partTree = this.buildPartTree(partsForMainTree);
-
-    const motorcycleSubs = parts.filter((p) => p.parentId === motorcycleId);
-    const motorcycleChildren: LibraryNode[] =
-      motorcycleSubs.length > 0
-        ? motorcycleSubs.map((s) => ({
-            id: s.id,
-            name: s.name,
-            slug: s.slug,
-            kind: 'PART' as const,
-            children: [],
-          }))
-        : motorcycleCat
-          ? [
-              {
-                id: motorcycleCat.id,
-                name: motorcycleCat.name,
-                slug: motorcycleCat.slug,
-                kind: 'PART' as const,
-                children: [],
-              },
-            ]
-          : [];
-
-    const carBrandChildren: LibraryNode[] = getCarBrandOptions().map((b) => ({
-      id: b.value,
-      name: b.label,
-      slug: b.value.toLowerCase(),
-      kind: 'CAR_BRAND' as const,
-      children: [],
-    }));
-
-    const libraries: LibraryNode[] = [
-      {
-        id: 'library-parts',
-        name: 'قطعات',
-        slug: 'parts',
-        kind: 'PART',
-        children: partTree,
-      },
-      {
-        id: 'library-motorcycle',
-        name: 'موتورسیکلت و چهارچرخ',
-        slug: MOTORCYCLE_ATV_SLUG,
-        kind: 'PART',
-        children: motorcycleChildren,
-      },
-      {
-        id: 'library-car-brands',
-        name: 'برند خودرو',
-        slug: 'car-brands',
-        kind: 'CAR_BRAND',
-        children: carBrandChildren,
-      },
-    ];
-
     return {
-      libraries,
+      libraries: libraryNodes,
       parts,
-      carBrands: getCarBrandOptions(),
+      carBrands,
+      carBrandCategories: await this.prisma.category.findMany({
+        where: { group: CategoryGroup.CAR_BRAND },
+        include: {
+          _count: { select: { children: true } },
+          parent: { select: { id: true, name: true } },
+          library: { select: { id: true, name: true, slug: true } },
+        },
+        orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      }),
+      libraryRecords: libraries,
     };
   }
 
@@ -142,124 +202,138 @@ export class CategoriesService {
           orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
         },
         parent: true,
+        library: true,
       },
     });
     if (!category) throw new NotFoundException('دسته‌بندی یافت نشد');
     return category;
   }
 
-  async create(data: {
-    name: string;
-    slug: string;
-    parentId?: string;
-    sortOrder?: number;
-  }) {
+  async create(data: CreateCategoryDto) {
+    let libraryId = data.libraryId;
+    if (!libraryId && data.parentId) {
+      const parent = await this.prisma.category.findUnique({
+        where: { id: data.parentId },
+        select: { libraryId: true, group: true },
+      });
+      libraryId = parent?.libraryId ?? undefined;
+      if (!data.group && parent?.group) {
+        data.group = parent.group;
+      }
+    }
+
+    const group = data.group ?? CategoryGroup.PART;
+
+    if (group === CategoryGroup.CAR_BRAND && data.brandCode) {
+      const code = data.brandCode.trim().toUpperCase();
+      const existing = await this.prisma.category.findUnique({ where: { brandCode: code } });
+      if (existing) {
+        throw new BadRequestException('این کد برند قبلاً ثبت شده است');
+      }
+      data.brandCode = code;
+    }
+
     return this.prisma.category.create({
       data: {
         name: data.name,
         slug: data.slug,
-        group: CategoryGroup.PART,
+        group,
+        brandCode: data.brandCode ?? null,
         parentId: data.parentId,
+        libraryId,
         sortOrder: data.sortOrder ?? 0,
+        isSystem: false,
       },
+      include: { library: true, parent: true },
     });
   }
 
-  async update(
-    id: string,
-    data: {
-      name?: string;
-      slug?: string;
-      parentId?: string | null;
-      sortOrder?: number;
-    },
-  ) {
-    return this.prisma.category.update({ where: { id }, data });
+  async update(id: string, data: UpdateCategoryDto) {
+    if (data.brandCode) {
+      data.brandCode = data.brandCode.trim().toUpperCase();
+      const existing = await this.prisma.category.findFirst({
+        where: { brandCode: data.brandCode, NOT: { id } },
+      });
+      if (existing) {
+        throw new BadRequestException('این کد برند قبلاً ثبت شده است');
+      }
+    }
+
+    const category = await this.prisma.category.findUnique({ where: { id } });
+    if (!category) throw new NotFoundException('دسته‌بندی یافت نشد');
+
+    return this.prisma.category.update({
+      where: { id },
+      data: {
+        ...data,
+        // Detach from seed sync so admin edits are not overwritten on next boot/seed.
+        ...(category.isSystem ? { isSystem: false } : {}),
+      },
+      include: { library: true, parent: true },
+    });
   }
 
   async remove(id: string) {
+    const category = await this.prisma.category.findUnique({
+      where: { id },
+      include: { _count: { select: { products: true, children: true } } },
+    });
+    if (!category) throw new NotFoundException('دسته‌بندی یافت نشد');
+    if (category._count.products > 0) {
+      throw new BadRequestException('این دسته دارای محصول است و قابل حذف نیست');
+    }
+    if (category._count.children > 0) {
+      throw new BadRequestException('ابتدا زیردسته‌ها را حذف کنید');
+    }
+    if (category.brandCode) {
+      const used = await this.prisma.productCarBrand.count({
+        where: { brandCode: category.brandCode },
+      });
+      if (used > 0) {
+        throw new BadRequestException('این برند در محصولات استفاده شده و قابل حذف نیست');
+      }
+    }
     return this.prisma.category.delete({ where: { id } });
   }
 
-  async seed() {
-    const groups = [
-      { name: 'موتور و انتقال', slug: 'engine-drivetrain', sortOrder: 1 },
-      { name: 'شاسی و تعلیق', slug: 'chassis', sortOrder: 2 },
-      { name: 'برق و روشنایی', slug: 'electrical', sortOrder: 3 },
-      { name: 'ظاهر و تجهیزات', slug: 'gear-style', sortOrder: 4 },
-      { name: 'سایر', slug: 'misc-group', sortOrder: 5 },
-    ];
-
-    const groupIds = new Map<string, string>();
-
-    for (const g of groups) {
-      const row = await this.prisma.category.upsert({
-        where: { slug: g.slug },
-        update: { name: g.name, group: CategoryGroup.PART, sortOrder: g.sortOrder, parentId: null },
-        create: { ...g, group: CategoryGroup.PART },
-      });
-      groupIds.set(g.slug, row.id);
+  async createLibrary(data: CreateLibraryDto) {
+    const existing = await this.prisma.library.findUnique({ where: { slug: data.slug } });
+    if (existing) {
+      throw new BadRequestException('این اسلاگ کتابخانه قبلاً ثبت شده است');
     }
-
-    await this.prisma.category.upsert({
-      where: { slug: MOTORCYCLE_ATV_SLUG },
-      update: {
-        name: 'موتورسیکلت و چهارچرخ',
-        group: CategoryGroup.PART,
-        sortOrder: 0,
-        parentId: null,
-      },
-      create: {
-        name: 'موتورسیکلت و چهارچرخ',
-        slug: MOTORCYCLE_ATV_SLUG,
-        group: CategoryGroup.PART,
-        sortOrder: 0,
+    return this.prisma.library.create({
+      data: {
+        name: data.name,
+        slug: data.slug,
+        kind: data.kind,
+        sortOrder: data.sortOrder ?? 0,
+        isSystem: false,
       },
     });
+  }
 
-    const children: { name: string; slug: string; parentSlug: string; sortOrder: number }[] = [
-      { name: 'دنده و انتقال قدرت', slug: 'transmission', parentSlug: 'engine-drivetrain', sortOrder: 1 },
-      { name: 'لوازم یدکی انجین', slug: 'engine-parts', parentSlug: 'engine-drivetrain', sortOrder: 2 },
-      { name: 'تعلیق و زیربندی', slug: 'suspension', parentSlug: 'chassis', sortOrder: 1 },
-      { name: 'لاستیک و رینگ', slug: 'tires-rims', parentSlug: 'chassis', sortOrder: 2 },
-      { name: 'چراغ و نور', slug: 'lighting', parentSlug: 'electrical', sortOrder: 1 },
-      { name: 'راهنما و مسیریاب', slug: 'navigation', parentSlug: 'electrical', sortOrder: 2 },
-      { name: 'اکسسوری و تزئینات', slug: 'accessories', parentSlug: 'gear-style', sortOrder: 1 },
-      { name: 'لباس و تجهیزات', slug: 'clothing-gear', parentSlug: 'gear-style', sortOrder: 2 },
-    ];
+  async updateLibrary(id: string, data: UpdateLibraryDto) {
+    const library = await this.prisma.library.findUnique({ where: { id } });
+    if (!library) throw new NotFoundException('کتابخانه یافت نشد');
 
-    for (const cat of children) {
-      const parentId = groupIds.get(cat.parentSlug);
-      await this.prisma.category.upsert({
-        where: { slug: cat.slug },
-        update: {
-          name: cat.name,
-          group: CategoryGroup.PART,
-          sortOrder: cat.sortOrder,
-          parentId: parentId ?? null,
-        },
-        create: {
-          name: cat.name,
-          slug: cat.slug,
-          group: CategoryGroup.PART,
-          sortOrder: cat.sortOrder,
-          parentId: parentId ?? null,
-        },
-      });
+    return this.prisma.library.update({
+      where: { id },
+      data: {
+        ...data,
+        ...(library.isSystem ? { isSystem: false } : {}),
+      },
+    });
+  }
+
+  async removeLibrary(id: string) {
+    const library = await this.prisma.library.findUnique({
+      where: { id },
+      include: { _count: { select: { categories: true } } },
+    });
+    if (!library) throw new NotFoundException('کتابخانه یافت نشد');
+    if (library._count.categories > 0) {
+      throw new BadRequestException('ابتدا دسته‌های این کتابخانه را حذف کنید');
     }
-
-    const other = await this.prisma.category.findUnique({ where: { slug: 'other' } });
-    const misc = await this.prisma.category.findUnique({ where: { slug: 'misc-group' } });
-    if (other && misc) {
-      await this.prisma.product.updateMany({
-        where: { categoryId: other.id },
-        data: { categoryId: misc.id },
-      });
-      await this.prisma.category.delete({ where: { id: other.id } });
-    } else if (other) {
-      await this.prisma.category.delete({ where: { id: other.id } });
-    }
-
-    return { message: 'دسته‌بندی‌های قطعه با گروه و زیرگروه ایجاد شدند' };
+    return this.prisma.library.delete({ where: { id } });
   }
 }

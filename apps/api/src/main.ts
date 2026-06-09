@@ -1,10 +1,18 @@
 import 'dotenv/config';
-import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { validationExceptionFactory } from './common/validation';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
+  });
+
+  // Default 100kb limit rejects listings with base64 images (~260kb+)
+  app.useBodyParser('json', { limit: '10mb' });
+  app.useBodyParser('urlencoded', { extended: true, limit: '10mb' });
 
   app.enableCors({
     origin: ['http://localhost:3000', 'http://localhost:3001'],
@@ -15,6 +23,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       transform: true,
+      exceptionFactory: validationExceptionFactory,
     }),
   );
 

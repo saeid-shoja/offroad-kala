@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { adminApi } from '@/lib/api';
 import { formatPrice } from '@offroad/shared';
-import { Shield, TrendingUp, CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, Shield, TrendingUp, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { adminApi } from '@/lib/api';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -12,23 +13,31 @@ export default function AdminProductsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchProducts = () => {
+  const fetchProducts = useCallback(() => {
     const params: Record<string, string> = { page: String(page), limit: '20' };
-    if (type) params.type = type;
+    if (type) params.advertiser = type;
     if (status) params.status = status;
-    adminApi.products(params).then((res) => {
-      setProducts(res.products);
-      setTotalPages(res.totalPages);
-    }).catch(() => {});
-  };
+    adminApi
+      .products(params)
+      .then((res) => {
+        setProducts(res.products);
+        setTotalPages(res.totalPages);
+      })
+      .catch(() => toast.error('بارگذاری محصولات ناموفق بود'));
+  }, [page, type, status]);
 
-  useEffect(() => { fetchProducts(); }, [page, type, status]);
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
       await adminApi.updateProductStatus(id, newStatus);
+      toast.success('وضعیت محصول به‌روزرسانی شد');
       fetchProducts();
-    } catch {}
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'خطا در به‌روزرسانی وضعیت');
+    }
   };
 
   return (
@@ -40,8 +49,11 @@ export default function AdminProductsPage() {
       <div className="flex flex-wrap gap-3">
         <select
           value={type}
-          onChange={(e) => { setType(e.target.value); setPage(1); }}
-          className="rounded-lg border px-3 py-2 text-sm outline-none"
+          onChange={(e) => {
+            setType(e.target.value);
+            setPage(1);
+          }}
+          className="rounded-sm border px-3 py-2 text-sm outline-none"
         >
           <option value="">همه انواع</option>
           <option value="SHOP">محصولات فروشگاه</option>
@@ -49,8 +61,11 @@ export default function AdminProductsPage() {
         </select>
         <select
           value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          className="rounded-lg border px-3 py-2 text-sm outline-none"
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setPage(1);
+          }}
+          className="rounded-sm border px-3 py-2 text-sm outline-none"
         >
           <option value="">همه وضعیت‌ها</option>
           <option value="ACTIVE">فعال</option>
@@ -60,7 +75,7 @@ export default function AdminProductsPage() {
         </select>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border bg-white">
+      <div className="overflow-x-auto rounded-lg border bg-white">
         <table className="w-full text-sm">
           <thead className="border-b bg-gray-50">
             <tr>
@@ -81,12 +96,12 @@ export default function AdminProductsPage() {
                   <p className="text-xs text-gray-500">{p.id.slice(0, 8)}...</p>
                 </td>
                 <td className="px-4 py-3 text-primary">{formatPrice(p.price)}</td>
-                <td className="px-4 py-3 text-xs">
-                  {p.user?.name || 'فروشگاه'}
-                </td>
+                <td className="px-4 py-3 text-xs">{p.user?.name || 'فروشگاه'}</td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${p.type === 'SHOP' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {p.type === 'SHOP' ? 'فروشگاه' : 'کاربری'}
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs ${(p.advertiser ?? p.type) === 'SHOP' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}
+                  >
+                    {(p.advertiser ?? p.type) === 'SHOP' ? 'فروشگاه' : 'کاربری'}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -99,11 +114,14 @@ export default function AdminProductsPage() {
                   <select
                     value={p.status}
                     onChange={(e) => handleStatusChange(p.id, e.target.value)}
-                    className={`rounded-lg border px-2 py-1 text-xs ${
-                      p.status === 'ACTIVE' ? 'border-green-300 text-green-700' :
-                      p.status === 'SOLD' ? 'border-blue-300 text-blue-700' :
-                      p.status === 'REJECTED' ? 'border-red-300 text-red-700' :
-                      'border-gray-300 text-gray-600'
+                    className={`rounded-sm border px-2 py-1 text-xs ${
+                      p.status === 'ACTIVE'
+                        ? 'border-green-300 text-green-700'
+                        : p.status === 'SOLD'
+                          ? 'border-blue-300 text-blue-700'
+                          : p.status === 'REJECTED'
+                            ? 'border-red-300 text-red-700'
+                            : 'border-gray-300 text-gray-600'
                     }`}
                   >
                     <option value="ACTIVE">فعال</option>
@@ -115,11 +133,18 @@ export default function AdminProductsPage() {
                 <td className="px-4 py-3 text-center">
                   <div className="flex justify-center gap-1">
                     <button
-                      onClick={() => handleStatusChange(p.id, p.status === 'ACTIVE' ? 'PENDING' : 'ACTIVE')}
+                      type="button"
+                      onClick={() =>
+                        handleStatusChange(p.id, p.status === 'ACTIVE' ? 'PENDING' : 'ACTIVE')
+                      }
                       className="rounded p-1.5 text-gray-500 hover:bg-gray-100"
                       title={p.status === 'ACTIVE' ? 'غیرفعال' : 'فعال'}
                     >
-                      {p.status === 'ACTIVE' ? <XCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
+                      {p.status === 'ACTIVE' ? (
+                        <XCircle className="h-4 w-4" />
+                      ) : (
+                        <CheckCircle className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
                 </td>
@@ -140,9 +165,10 @@ export default function AdminProductsPage() {
         <div className="flex justify-center gap-2">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
             <button
+              type="button"
               key={p}
               onClick={() => setPage(p)}
-              className={`h-9 w-9 rounded-lg text-sm ${page === p ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}
+              className={`h-9 w-9 rounded-sm text-sm ${page === p ? 'bg-primary text-white' : 'bg-white text-gray-700'}`}
             >
               {p}
             </button>

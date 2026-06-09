@@ -12,34 +12,20 @@ enum UserRole {
   ADMIN
 }
 
-enum ProductType {
+enum Advertiser {
   CLIENT
   SHOP
 }
 
-enum CarBrand {
-  TOYOTA
-  NISSAN
-  MITSUBISHI
-  MERCEDES
-  FORD
-  SUZUKI
-  JAC
-  HAVAL
-  HYUNDAI
-  KIA
-  LAND_ROVER
-  LEXUS
-  RENAULT
-  VOLVO
-  JEEP
-  OTHER
-}
-
 enum ProductStatus {
   ACTIVE
-  INACTIVE
+  DEPRECATED
   PENDING
+}
+
+enum ProductSituation {
+  NEW
+  USED
 }
 
 enum OrderStatus {
@@ -50,13 +36,36 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum PaymentMethod {
+  ONLINE
+  COD
+}
+
+enum UserMessageType {
+  ANNOUNCEMENT
+  NOTIFICATION
+  MESSAGE
+}
+
+enum MessageTarget {
+  ALL
+  USER
+}
+
 enum CategoryGroup {
   PART
+  CAR_BRAND
+}
+
+enum LibraryKind {
+  PART_TREE
+  CAR_BRANDS
 }
 
 model User {
   id        String    @id @default(cuid())
   phone     String    @unique
+  email     String?   @unique
   name      String
   password  String
   role      UserRole  @default(CLIENT)
@@ -65,6 +74,23 @@ model User {
   updatedAt DateTime  @updatedAt
   products  Product[]
   orders    Order[]
+  auctionBids AuctionBid[]
+  messages  UserMessage[]
+  sentMessageBatches MessageBatch[] @relation("MessageBatchSender")
+  targetedMessageBatches MessageBatch[] @relation("MessageBatchTarget")
+  favorites Favorite[]
+}
+
+model Library {
+  id         String      @id @default(cuid())
+  name       String
+  slug       String      @unique
+  kind       LibraryKind
+  sortOrder  Int         @default(0)
+  isSystem   Boolean     @default(true)
+  categories Category[]
+
+  @@index([sortOrder])
 }
 
 model Category {
@@ -72,7 +98,11 @@ model Category {
   name      String
   slug      String        @unique
   group     CategoryGroup @default(PART)
+  brandCode String?       @unique
   sortOrder Int           @default(0)
+  isSystem  Boolean       @default(true)
+  libraryId String?
+  library   Library?      @relation(fields: [libraryId], references: [id])
   parentId  String?
   parent    Category?     @relation("CategoryParent", fields: [parentId], references: [id])
   children  Category[]    @relation("CategoryParent")
@@ -80,40 +110,73 @@ model Category {
 
   @@index([group])
   @@index([parentId])
+  @@index([libraryId])
 }
 
 model ProductCarBrand {
   productId String
-  brand     CarBrand
+  brandCode String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  @@id([productId, brand])
-  @@index([brand])
+  @@id([productId, brandCode])
+  @@index([brandCode])
 }
 
 model Product {
-  id           String             @id @default(cuid())
-  title        String
-  description  String
-  price        Float
-  images       String             @default("[]")
-  categoryId   String
-  category     Category           @relation(fields: [categoryId], references: [id])
-  userId       String?
-  user         User?              @relation(fields: [userId], references: [id])
-  type         ProductType        @default(CLIENT)
-  hasGuarantee Boolean            @default(false)
-  isBoosted    Boolean            @default(false)
-  status       ProductStatus      @default(ACTIVE)
-  city         String?
-  phone        String?
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  orderItems   OrderItem[]
-  carBrands    ProductCarBrand[]
+  id                 String             @id @default(cuid())
+  title              String
+  description        String
+  price              Float
+  images             String             @default("[]")
+  categoryId         String
+  category           Category           @relation(fields: [categoryId], references: [id])
+  userId             String?
+  user               User?              @relation(fields: [userId], references: [id])
+  advertiser         Advertiser        @default(CLIENT)
+  hasGuarantee       Boolean            @default(false)
+  isBoosted          Boolean            @default(false)
+  strengthenedUntil  DateTime?
+  status             ProductStatus      @default(ACTIVE)
+  situation          ProductSituation?
+  city               String?
+  phone              String?
+  isAuction          Boolean            @default(false)
+  auctionStartPrice  Float?
+  auctionCurrentPrice Float?
+  buyNowPrice        Float?
+  realPriceMin       Float?
+  realPriceMax       Float?
+  auctionEndsAt      DateTime?
+  activeUntil        DateTime?
+  deprecatedAt       DateTime?
+  listedAt           DateTime           @default(now())
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  orderItems         OrderItem[]
+  carBrands          ProductCarBrand[]
+  auctionBids        AuctionBid[]
+  favorites          Favorite[]
 
-  @@index([type, status])
+  @@index([advertiser, status])
   @@index([categoryId])
+  @@index([userId])
+  @@index([isAuction, auctionEndsAt])
+}
+
+model AuctionBid {
+  id            String   @id @default(cuid())
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  amount        Float
+  bidderName    String
+  bidderPhone   String
+  bidderAddress String
+  bidderCity    String?
+  createdAt     DateTime @default(now())
+
+  @@index([productId, createdAt])
   @@index([userId])
 }
 
@@ -121,9 +184,12 @@ model Order {
   id        String      @id @default(cuid())
   userId    String
   user      User        @relation(fields: [userId], references: [id])
-  total     Float
-  status    OrderStatus @default(PENDING)
-  address   String?
+  total           Float
+  status          OrderStatus    @default(PENDING)
+  address         String?
+  phone           String?
+  note            String?
+  paymentMethod   PaymentMethod?
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   items     OrderItem[]
@@ -139,4 +205,48 @@ model OrderItem {
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int     @default(1)
   price     Float
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+}
+
+model MessageBatch {
+  id             String          @id @default(cuid())
+  title          String
+  body           String
+  type           UserMessageType @default(ANNOUNCEMENT)
+  target         MessageTarget   @default(ALL)
+  targetUserId   String?
+  targetUser     User?           @relation("MessageBatchTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+  sentById       String
+  sentBy         User            @relation("MessageBatchSender", fields: [sentById], references: [id])
+  recipientCount Int             @default(0)
+  createdAt      DateTime        @default(now())
+  messages       UserMessage[]
+
+  @@index([createdAt])
+}
+
+model UserMessage {
+  id        String       @id @default(cuid())
+  batchId   String
+  batch     MessageBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt    DateTime?
+  createdAt DateTime     @default(now())
+
+  @@unique([batchId, userId])
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
 }

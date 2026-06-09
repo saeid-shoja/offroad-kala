@@ -11,3 +11,5 @@ turbo/
 .env.production.local
 coverage/
 apps/api/src/prisma/generated/
+
+.DS_Store

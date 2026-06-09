@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { IRAN_PROVINCES } from '@/lib/iran-locations';
+import { FieldError } from '@/components/form/field-error';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -10,20 +10,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { IRAN_PROVINCES } from '@/lib/iran-locations';
 
 interface CitySelectProps {
   value: string;
   onChange: (city: string) => void;
   label?: string;
   required?: boolean;
+  error?: string;
 }
 
-export function CitySelect({
-  value,
-  onChange,
-  label = 'شهر',
-  required,
-}: CitySelectProps) {
+export function CitySelect({ value, onChange, label = 'شهر', required, error }: CitySelectProps) {
   const [provinceId, setProvinceId] = useState<number | null>(() => {
     if (!value) return null;
     const found = IRAN_PROVINCES.find((p) => p.cities.includes(value));
@@ -76,6 +73,7 @@ export function CitySelect({
             ))}
           </SelectContent>
         </Select>
+        <FieldError message={error} />
       </div>
     </div>
   );

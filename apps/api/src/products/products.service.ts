@@ -1,27 +1,38 @@
 import {
+  BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
-  ForbiddenException,
 } from '@nestjs/common';
+import { strengthenedEndsAt } from '@offroad/shared';
+import { CategoriesService } from '../categories/categories.service';
+import { getAuctionCurrentPrice, isAuctionActive } from '../common/auction';
+import { isPurchasableProduct } from '../common/purchasable';
+import type { Advertiser, ProductSituation } from '../prisma/generated/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CarBrand, ProductType } from '../prisma/generated/client';
-import { getCarBrandLabel, parseCarBrands } from '../common/car-brands';
+import type { CreateProductDto, UpdateProductDto } from './dto';
+import { computeActiveUntil, computeDeletionAt } from './product-lifecycle.constants';
 
 const productInclude = {
   category: true,
   user: { select: { name: true, city: true } },
   carBrands: true,
+  _count: { select: { auctionBids: true } },
 };
 
 const productIncludeDetail = {
   category: true,
   user: { select: { id: true, name: true, phone: true, city: true } },
   carBrands: true,
+  _count: { select: { auctionBids: true } },
 };
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private categoriesService: CategoriesService,
+  ) {}
 
   private postedSince(postedWithin: string): Date | null {
     const now = Date.now();
@@ -35,37 +46,107 @@ export class ProductsService {
     return new Date(now - h * 60 * 60 * 1000);
   }
 
-  private mapProduct<
+  async mapProduct<
     T extends {
       images: string;
-      carBrands?: { brand: CarBrand }[];
-      type?: string;
-      createdAt?: Date;
+      carBrands?: { brandCode: string }[];
+      advertiser: Advertiser;
+      hasGuarantee: boolean;
+      status: string;
+      situation?: ProductSituation | null;
+      isAuction?: boolean;
+      auctionStartPrice?: number | null;
+      auctionCurrentPrice?: number | null;
+      buyNowPrice?: number | null;
+      realPriceMin?: number | null;
+      realPriceMax?: number | null;
+      auctionEndsAt?: Date | null;
+      activeUntil?: Date | null;
+      deprecatedAt?: Date | null;
+      listedAt?: Date;
+      strengthenedUntil?: Date | null;
+      price: number;
+      _count?: { auctionBids: number };
     },
   >(product: T) {
-    const brands = product.carBrands?.map((row) => row.brand) ?? [];
-    const createdAt = product.createdAt ? new Date(product.createdAt) : null;
-    const isNew =
-      createdAt != null &&
-      Date.now() - createdAt.getTime() < 7 * 24 * 60 * 60 * 1000;
-    return {
+    const strengthenedActive =
+      product.strengthenedUntil != null && product.strengthenedUntil.getTime() > Date.now();
+    const brandLabels = await this.categoriesService.getCarBrandLabelMap();
+    const brands = product.carBrands?.map((row) => row.brandCode) ?? [];
+    const isAuction = Boolean(product.isAuction);
+    const startPrice = product.auctionStartPrice ?? product.price;
+    const currentPrice = isAuction
+      ? getAuctionCurrentPrice(startPrice, product.auctionCurrentPrice)
+      : product.price;
+    const auctionActive =
+      isAuction &&
+      product.auctionEndsAt != null &&
+      isAuctionActive(product.auctionEndsAt) &&
+      product.status === 'ACTIVE';
+
+    const mapped: Record<string, unknown> = {
       ...product,
       images: JSON.parse(product.images),
       carBrands: brands.map((brand) => ({
         value: brand,
-        label: getCarBrandLabel(brand),
+        label: brandLabels.get(brand) ?? brand,
       })),
-      situation:
-        product.type === 'SHOP'
-          ? 'IN_STOCK'
-          : isNew
-            ? 'NEW'
-            : null,
+      situation: product.advertiser === 'SHOP' ? 'IN_STOCK' : (product.situation ?? null),
+      /** @deprecated use advertiser — kept for existing web clients */
+      type: product.advertiser,
+      purchasable: isPurchasableProduct({
+        advertiser: product.advertiser,
+        hasGuarantee: product.hasGuarantee,
+        status: product.status as 'ACTIVE' | 'DEPRECATED' | 'PENDING',
+        isAuction,
+        buyNowPrice: product.buyNowPrice,
+        auctionEndsAt: product.auctionEndsAt,
+      }),
+      isAuction,
+      auctionStartPrice: product.auctionStartPrice,
+      auctionCurrentPrice: currentPrice,
+      buyNowPrice: product.buyNowPrice,
+      realPriceMin: product.realPriceMin,
+      realPriceMax: product.realPriceMax,
+      auctionEndsAt: product.auctionEndsAt,
+      activeUntil: product.activeUntil,
+      deprecatedAt: product.deprecatedAt,
+      deletionAt: product.deprecatedAt ? computeDeletionAt(product.deprecatedAt) : null,
+      listedAt: product.listedAt,
+      strengthenedUntil: product.strengthenedUntil,
+      isStrengthenedActive: strengthenedActive,
+      auctionActive,
+      bidCount: product._count?.auctionBids ?? 0,
+      displayPrice: isAuction ? currentPrice : product.price,
+      hideSellerPhone: isAuction,
     };
+
+    if (isAuction) {
+      mapped.price = currentPrice;
+    }
+
+    delete mapped._count;
+    return mapped;
+  }
+
+  private async expireStrengthenedProducts(): Promise<void> {
+    await this.prisma.product.updateMany({
+      where: { strengthenedUntil: { lt: new Date() } },
+      data: { strengthenedUntil: null },
+    });
+  }
+
+  private assertClientListingOwner(
+    product: { userId: string | null; advertiser: string },
+    userId: string,
+  ) {
+    if (product.advertiser !== 'CLIENT' || product.userId !== userId) {
+      throw new ForbiddenException('شما اجازه تغییر این آگهی را ندارید');
+    }
   }
 
   async findAll(params: {
-    type?: string;
+    advertiser?: string;
     categoryId?: string;
     carBrand?: string;
     search?: string;
@@ -77,6 +158,10 @@ export class ProductsService {
     minPrice?: number;
     maxPrice?: number;
     postedWithin?: string;
+    situation?: ProductSituation;
+    hasGuarantee?: boolean;
+    auction?: boolean;
+    auctionActive?: boolean;
   }) {
     const page = params.page || 1;
     const limit = params.limit || 30;
@@ -84,7 +169,10 @@ export class ProductsService {
 
     const where: any = { status: 'ACTIVE' };
 
-    if (params.type) where.type = params.type;
+    if (params.advertiser) where.advertiser = params.advertiser;
+    if (params.advertiser === 'CLIENT' && params.auction !== true) {
+      where.isAuction = false;
+    }
     if (params.categoryId) {
       const category = await this.prisma.category.findUnique({
         where: { id: params.categoryId },
@@ -104,9 +192,9 @@ export class ProductsService {
       where.city = params.city;
     }
     if (params.carBrand) {
-      const brands = parseCarBrands([params.carBrand]);
+      const brands = await this.categoriesService.parseCarBrandCodes([params.carBrand]);
       if (brands.length) {
-        where.carBrands = { some: { brand: brands[0] } };
+        where.carBrands = { some: { brandCode: brands[0] } };
       }
     }
     if (params.search) {
@@ -122,10 +210,42 @@ export class ProductsService {
     }
     if (params.postedWithin) {
       const since = this.postedSince(params.postedWithin);
-      if (since) where.createdAt = { gte: since };
+      if (since) where.listedAt = { gte: since };
+    }
+    if (params.situation === 'NEW') {
+      if (params.advertiser === 'CLIENT') {
+        where.situation = 'NEW';
+      } else if (params.advertiser !== 'SHOP') {
+        where.AND = [
+          ...(Array.isArray(where.AND) ? where.AND : []),
+          { OR: [{ situation: 'NEW' }, { advertiser: 'SHOP' }] },
+        ];
+      }
+    } else if (params.situation === 'USED') {
+      where.situation = 'USED';
+    }
+    if (params.hasGuarantee === true) {
+      where.hasGuarantee = true;
+    } else if (params.hasGuarantee === false) {
+      where.hasGuarantee = false;
     }
 
-    const orderBy: any = [{ isBoosted: 'desc' }, { createdAt: 'desc' }];
+    if (params.auction === true) {
+      where.isAuction = true;
+    }
+
+    if (params.auctionActive === true) {
+      where.isAuction = true;
+      where.status = 'ACTIVE';
+      where.auctionEndsAt = { gt: new Date() };
+    }
+
+    await this.expireStrengthenedProducts();
+
+    const orderBy: any = [
+      { strengthenedUntil: { sort: 'desc', nulls: 'last' } },
+      { listedAt: 'desc' },
+    ];
 
     const [products, total] = await Promise.all([
       this.prisma.product.findMany({
@@ -139,9 +259,7 @@ export class ProductsService {
     ]);
 
     return {
-      products: products.map((p: { images: string; carBrands?: { brand: CarBrand }[] }) =>
-        this.mapProduct(p),
-      ),
+      products: await Promise.all(products.map((p) => this.mapProduct(p))),
       total,
       page,
       totalPages: Math.ceil(total / limit),
@@ -157,39 +275,62 @@ export class ProductsService {
     return this.mapProduct(product);
   }
 
-  async create(
-    data: {
-      title: string;
-      description: string;
-      price: number;
-      images: string[];
-      categoryId: string;
-      carBrands?: string[];
-      hasGuarantee?: boolean;
-      isBoosted?: boolean;
-      city?: string;
-      phone?: string;
-      type?: string;
-    },
-    userId?: string,
-  ) {
-    const brands = parseCarBrands(data.carBrands);
+  private buildAuctionCreateData(data: CreateProductDto) {
+    if (!data.isAuction) return {};
+
+    const start = data.auctionStartPrice ?? data.price;
+    const endsAt = data.auctionEndsAt ? new Date(data.auctionEndsAt) : null;
+
+    if (!endsAt || endsAt.getTime() <= Date.now()) {
+      throw new BadRequestException('زمان پایان مزایده باید در آینده باشد');
+    }
+
+    if (
+      data.realPriceMin != null &&
+      data.realPriceMax != null &&
+      data.realPriceMin > data.realPriceMax
+    ) {
+      throw new BadRequestException('حداقل قیمت واقعی نمی‌تواند بیشتر از حداکثر باشد');
+    }
+
+    return {
+      isAuction: true,
+      auctionStartPrice: start,
+      auctionCurrentPrice: start,
+      price: start,
+      buyNowPrice: data.buyNowPrice ?? null,
+      realPriceMin: data.realPriceMin ?? null,
+      realPriceMax: data.realPriceMax ?? null,
+      auctionEndsAt: endsAt,
+      phone: null,
+    };
+  }
+
+  async create(data: CreateProductDto, userId?: string) {
+    const brands = await this.categoriesService.parseCarBrandCodes(data.carBrands);
+    const auctionData = this.buildAuctionCreateData(data);
+    const listingPrice = data.isAuction ? (data.auctionStartPrice ?? data.price) : data.price;
 
     const product = await this.prisma.product.create({
       data: {
         title: data.title,
         description: data.description,
-        price: data.price,
+        price: listingPrice,
         images: JSON.stringify(data.images || []),
         categoryId: data.categoryId,
-        hasGuarantee: data.hasGuarantee || false,
+        hasGuarantee: data.isAuction ? false : data.hasGuarantee || false,
         isBoosted: data.isBoosted || false,
+        strengthenedUntil: data.applyStrengthened ? strengthenedEndsAt() : null,
         city: data.city,
-        phone: data.phone,
-        type: (data.type as ProductType) || 'CLIENT',
+        phone: data.isAuction ? undefined : data.phone,
+        advertiser: data.advertiser ?? 'CLIENT',
+        situation: data.situation,
         userId: userId || null,
+        activeUntil: (data.advertiser ?? 'CLIENT') === 'CLIENT' ? computeActiveUntil() : null,
+        listedAt: data.isBoosted ? new Date() : undefined,
+        ...auctionData,
         carBrands: brands.length
-          ? { create: brands.map((brand) => ({ brand })) }
+          ? { create: brands.map((brandCode) => ({ brandCode })) }
           : undefined,
       },
       include: productIncludeDetail,
@@ -197,43 +338,38 @@ export class ProductsService {
     return this.mapProduct(product);
   }
 
-  async update(
-    id: string,
-    data: {
-      title?: string;
-      description?: string;
-      price?: number;
-      images?: string[];
-      categoryId?: string;
-      carBrands?: string[];
-      hasGuarantee?: boolean;
-      isBoosted?: boolean;
-      status?: string;
-      city?: string;
-      phone?: string;
-    },
-    userId?: string,
-    userRole?: string,
-  ) {
+  async update(id: string, data: UpdateProductDto, userId?: string, userRole?: string) {
     const product = await this.prisma.product.findUnique({ where: { id } });
     if (!product) throw new NotFoundException('محصول یافت نشد');
 
-    if (product.type === 'CLIENT' && product.userId !== userId && userRole !== 'ADMIN') {
+    if (product.advertiser === 'CLIENT' && product.userId !== userId && userRole !== 'ADMIN') {
       throw new ForbiddenException('شما اجازه ویرایش این محصول را ندارید');
     }
 
     const updateData: any = { ...data };
     delete updateData.carBrands;
+    if (updateData.type != null && updateData.advertiser == null) {
+      updateData.advertiser = updateData.type;
+      delete updateData.type;
+    }
     if (data.images) updateData.images = JSON.stringify(data.images);
+    if (data.auctionEndsAt) updateData.auctionEndsAt = new Date(data.auctionEndsAt);
+    if (data.auctionStartPrice != null && product.isAuction) {
+      updateData.auctionStartPrice = data.auctionStartPrice;
+    }
 
     if (data.carBrands !== undefined) {
-      const brands = parseCarBrands(data.carBrands);
+      const brands = await this.categoriesService.parseCarBrandCodes(data.carBrands);
       await this.prisma.productCarBrand.deleteMany({ where: { productId: id } });
       if (brands.length > 0) {
         updateData.carBrands = {
-          create: brands.map((brand) => ({ brand })),
+          create: brands.map((brandCode) => ({ brandCode })),
         };
       }
+    }
+
+    if (data.isBoosted === true && !product.isBoosted) {
+      updateData.listedAt = new Date();
     }
 
     const updated = await this.prisma.product.update({
@@ -244,14 +380,80 @@ export class ProductsService {
     return this.mapProduct(updated);
   }
 
+  async applyStrengthened(id: string, userId: string) {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product) throw new NotFoundException('محصول یافت نشد');
+    this.assertClientListingOwner(product, userId);
+    if (product.status !== 'ACTIVE') {
+      throw new BadRequestException('فقط آگهی‌های فعال قابل تقویت هستند');
+    }
+    if (product.isAuction) {
+      throw new BadRequestException('مزایده‌ها قابل تقویت نیستند');
+    }
+
+    const updated = await this.prisma.product.update({
+      where: { id },
+      data: { strengthenedUntil: strengthenedEndsAt() },
+      include: productIncludeDetail,
+    });
+    return this.mapProduct(updated);
+  }
+
+  async applyBoost(id: string, userId: string) {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product) throw new NotFoundException('محصول یافت نشد');
+    this.assertClientListingOwner(product, userId);
+    if (product.status !== 'ACTIVE') {
+      throw new BadRequestException('فقط آگهی‌های فعال قابل پله‌شدن هستند');
+    }
+    if (product.isAuction) {
+      throw new BadRequestException('مزایده‌ها قابل پله‌شدن نیستند');
+    }
+
+    const now = new Date();
+    const updated = await this.prisma.product.update({
+      where: { id },
+      data: { isBoosted: true, listedAt: now },
+      include: productIncludeDetail,
+    });
+    return this.mapProduct(updated);
+  }
+
   async remove(id: string, userId?: string, userRole?: string) {
     const product = await this.prisma.product.findUnique({ where: { id } });
     if (!product) throw new NotFoundException('محصول یافت نشد');
 
-    if (product.type === 'CLIENT' && product.userId !== userId && userRole !== 'ADMIN') {
+    if (product.advertiser === 'CLIENT' && product.userId !== userId && userRole !== 'ADMIN') {
       throw new ForbiddenException('شما اجازه حذف این محصول را ندارید');
     }
 
     return this.prisma.product.delete({ where: { id } });
+  }
+
+  async reactivate(id: string, userId: string) {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product) throw new NotFoundException('محصول یافت نشد');
+
+    if (product.advertiser !== 'CLIENT' || product.userId !== userId) {
+      throw new ForbiddenException('شما اجازه فعال‌سازی این آگهی را ندارید');
+    }
+
+    if (product.status !== 'DEPRECATED') {
+      throw new BadRequestException('فقط آگهی‌های منقضی‌شده قابل فعال‌سازی مجدد هستند');
+    }
+
+    const now = new Date();
+    const updated = await this.prisma.product.update({
+      where: { id },
+      data: {
+        status: 'ACTIVE',
+        activeUntil: computeActiveUntil(now),
+        deprecatedAt: null,
+        listedAt: now,
+      },
+      include: productIncludeDetail,
+    });
+
+    return this.mapProduct(updated);
   }
 }

@@ -1,4 +1,4 @@
-import type { LibraryNode } from '@/providers/categories-provider';
+import type { LibraryNode } from '@/stores/categories-store';
 
 export function getLibraryNodeHref(node: LibraryNode): string {
   if (node.kind === 'CAR_BRAND') {

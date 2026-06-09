@@ -1,14 +1,19 @@
 'use client';
 
+import { formatPrice } from '@offroad/shared';
+import { Package, ShoppingCart, TrendingUp, Users } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { adminApi } from '@/lib/api';
-import { Package, Users, ShoppingCart, TrendingUp } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    adminApi.dashboard().then(setData).catch(() => {});
+    adminApi
+      .dashboard()
+      .then(setData)
+      .catch(() => {});
   }, []);
 
   if (!data) {
@@ -22,7 +27,7 @@ export default function AdminDashboardPage() {
       <h1 className="text-2xl font-bold">داشبورد مدیریت</h1>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div className="rounded-xl border bg-white p-4">
+        <div className="rounded-lg border bg-white p-4">
           <div className="flex items-center gap-3">
             <Package className="h-8 w-8 text-primary" />
             <div>
@@ -31,7 +36,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border bg-white p-4">
+        <div className="rounded-lg border bg-white p-4">
           <div className="flex items-center gap-3">
             <TrendingUp className="h-8 w-8 text-secondary" />
             <div>
@@ -40,7 +45,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border bg-white p-4">
+        <div className="rounded-lg border bg-white p-4">
           <div className="flex items-center gap-3">
             <ShoppingCart className="h-8 w-8 text-blue-500" />
             <div>
@@ -49,7 +54,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border bg-white p-4">
+        <div className="rounded-lg border bg-white p-4">
           <div className="flex items-center gap-3">
             <Users className="h-8 w-8 text-purple-500" />
             <div>
@@ -61,25 +66,39 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border bg-white p-4">
+        <div className="rounded-lg border bg-white p-4">
           <h2 className="mb-4 font-bold">آخرین محصولات</h2>
           <div className="space-y-3">
             {recentProducts.map((p: any) => (
               <div key={p.id} className="flex items-center gap-3 border-b pb-2 text-sm">
-                <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded bg-gray-100">
+                <div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-gray-100">
                   {p.images[0] ? (
-                    <img src={p.images[0]} alt="" className="h-full w-full object-cover" />
+                    <Image
+                      width={400}
+                      height={400}
+                      src={p.images[0]}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-xs text-gray-400">بدون عکس</div>
+                    <div className="flex h-full items-center justify-center text-xs text-gray-400">
+                      بدون عکس
+                    </div>
                   )}
                 </div>
                 <div className="flex-1 truncate">
                   <p className="truncate font-medium">{p.title}</p>
-                  <p className="text-xs text-gray-500">{p.category?.name} • {p.price.toLocaleString('fa-IR')} تومان</p>
+                  <p className="text-xs text-gray-500">
+                    {p.category?.name} • {formatPrice(p.price)} تومان
+                  </p>
                 </div>
-                <span className={`rounded-full px-2 py-0.5 text-xs ${
-                  p.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                }`}>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs ${
+                    p.status === 'ACTIVE'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
                   {p.status === 'ACTIVE' ? 'فعال' : p.status}
                 </span>
               </div>
@@ -87,7 +106,7 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border bg-white p-4">
+        <div className="rounded-lg border bg-white p-4">
           <h2 className="mb-4 font-bold">آخرین سفارشات</h2>
           <div className="space-y-3">
             {recentOrders.map((o: any) => (
@@ -100,7 +119,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="mt-1 flex items-center justify-between text-xs text-gray-500">
                   <span>{o.items?.length} قلم</span>
-                  <span className="font-medium text-primary">{o.total.toLocaleString('fa-IR')} تومان</span>
+                  <span className="font-medium text-primary">{formatPrice(o.total)} تومان</span>
                 </div>
               </div>
             ))}

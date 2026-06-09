@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from './generated/client';
 
@@ -20,6 +20,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.client.user;
   }
 
+  get library(): PrismaClient['library'] {
+    return this.client.library;
+  }
+
   get category(): PrismaClient['category'] {
     return this.client.category;
   }
@@ -38,6 +42,30 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
 
   get productCarBrand(): PrismaClient['productCarBrand'] {
     return this.client.productCarBrand;
+  }
+
+  get auctionBid(): PrismaClient['auctionBid'] {
+    return this.client.auctionBid;
+  }
+
+  get messageBatch(): PrismaClient['messageBatch'] {
+    return this.client.messageBatch;
+  }
+
+  get userMessage(): PrismaClient['userMessage'] {
+    return this.client.userMessage;
+  }
+
+  get favorite(): PrismaClient['favorite'] {
+    return this.client.favorite;
+  }
+
+  $transaction<T>(
+    fn: (
+      tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$extends'>,
+    ) => Promise<T>,
+  ): Promise<T> {
+    return this.client.$transaction(fn);
   }
 
   async onModuleInit() {

@@ -1,52 +1,32 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  Query,
-  Request,
-} from '@nestjs/common';
-import { ProductsService } from './products.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request } from '@nestjs/common';
 import { Public } from '../auth/custom.decorator';
+import { CreateProductDto, FindProductsQueryDto, UpdateProductDto } from './dto';
+import { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private productsService: ProductsService) { }
+  constructor(private productsService: ProductsService) {}
 
   @Public()
   @Get()
-  findAll(
-    @Query('type') type?: string,
-    @Query('categoryId') categoryId?: string,
-    @Query('search') search?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('city') city?: string,
-    @Query('cities') cities?: string,
-    @Query('carBrand') carBrand?: string,
-    @Query('sortBy') sortBy?: string,
-    @Query('minPrice') minPrice?: string,
-    @Query('maxPrice') maxPrice?: string,
-    @Query('postedWithin') postedWithin?: string,
-  ) {
+  findAll(@Query() query: FindProductsQueryDto) {
     return this.productsService.findAll({
-      type,
-      categoryId,
-      carBrand,
-      search,
-      page: page ? Number(page) : 1,
-      limit: limit ? Number(limit) : 20,
-      city,
-      cities: cities
-        ? cities.split(',').map((c) => c.trim()).filter(Boolean)
-        : undefined,
-      sortBy,
-      minPrice: minPrice ? Number(minPrice) : undefined,
-      maxPrice: maxPrice ? Number(maxPrice) : undefined,
-      postedWithin,
+      advertiser: query.advertiser,
+      categoryId: query.categoryId,
+      carBrand: query.carBrand,
+      search: query.search,
+      page: query.page ?? 1,
+      limit: query.limit ?? 20,
+      city: query.city,
+      cities: query.cities,
+      sortBy: query.sortBy,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      postedWithin: query.postedWithin,
+      situation: query.situation,
+      hasGuarantee: query.hasGuarantee,
+      auction: query.auction,
+      auctionActive: query.auctionActive,
     });
   }
 
@@ -57,29 +37,41 @@ export class ProductsController {
   }
 
   @Post()
-  create(@Body() body: any, @Request() req: { user: { userId: string } }) {
+  create(@Body() body: CreateProductDto, @Request() req: { user: { userId: string } }) {
     return this.productsService.create(body, req.user.userId);
   }
 
   @Post('public')
-  createPublic(@Body() body: any, @Request() req: { user: { userId: string } }) {
-    return this.productsService.create({ ...body, type: 'CLIENT' }, req.user.userId);
+  createPublic(@Body() body: CreateProductDto, @Request() req: { user: { userId: string } }) {
+    return this.productsService.create({ ...body, advertiser: 'CLIENT' }, req.user.userId);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() body: any,
+    @Body() body: UpdateProductDto,
     @Request() req: { user: { userId: string; role: string } },
   ) {
     return this.productsService.update(id, body, req.user.userId, req.user.role);
   }
 
+  @Post(':id/reactivate')
+  reactivate(@Param('id') id: string, @Request() req: { user: { userId: string } }) {
+    return this.productsService.reactivate(id, req.user.userId);
+  }
+
+  @Post(':id/apply-strengthened')
+  applyStrengthened(@Param('id') id: string, @Request() req: { user: { userId: string } }) {
+    return this.productsService.applyStrengthened(id, req.user.userId);
+  }
+
+  @Post(':id/apply-boost')
+  applyBoost(@Param('id') id: string, @Request() req: { user: { userId: string } }) {
+    return this.productsService.applyBoost(id, req.user.userId);
+  }
+
   @Delete(':id')
-  remove(
-    @Param('id') id: string,
-    @Request() req: { user: { userId: string; role: string } },
-  ) {
+  remove(@Param('id') id: string, @Request() req: { user: { userId: string; role: string } }) {
     return this.productsService.remove(id, req.user.userId, req.user.role);
   }
 }

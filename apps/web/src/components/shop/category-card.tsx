@@ -10,7 +10,7 @@ export function CategoryCard({ category }: CategoryCardProps) {
   return (
     <Link
       href={`/category/${category.slug}`}
-      className="bg-card hover:border-primary flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all hover:text-primary"
+      className="bg-card hover:border-primary flex flex-col items-center gap-2 rounded-lg border p-4 text-center transition-all hover:text-primary"
     >
       <span className="text-sm font-medium">{category.name}</span>
       {category._count && (

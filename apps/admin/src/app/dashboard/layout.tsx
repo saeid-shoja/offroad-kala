@@ -1,23 +1,27 @@
 'use client';
 
+import {
+  ChevronLeft,
+  FolderTree,
+  LayoutDashboard,
+  LogOut,
+  Megaphone,
+  Package,
+  ShoppingCart,
+  Store,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import {
-  LayoutDashboard,
-  Package,
-  Users,
-  ShoppingCart,
-  LogOut,
-  ChevronLeft,
-  Store,
-} from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'داشبورد', icon: LayoutDashboard },
   { href: '/dashboard/products', label: 'محصولات', icon: Package },
+  { href: '/dashboard/categories', label: 'دسته‌بندی‌ها', icon: FolderTree },
   { href: '/dashboard/users', label: 'کاربران', icon: Users },
   { href: '/dashboard/orders', label: 'سفارشات', icon: ShoppingCart },
+  { href: '/dashboard/messages', label: 'پیام‌ها', icon: Megaphone },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -48,10 +52,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {sidebarOpen && <span>پنل مدیریت</span>}
           </Link>
           <button
+            type="button"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100"
+            className="rounded-sm p-1.5 text-gray-500 hover:bg-gray-100"
           >
-            <ChevronLeft className={`h-5 w-5 transition-transform ${!sidebarOpen && 'rotate-180'}`} />
+            <ChevronLeft
+              className={`h-5 w-5 transition-transform ${!sidebarOpen && 'rotate-180'}`}
+            />
           </button>
         </div>
 
@@ -63,7 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                className={`flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm transition-colors ${
                   active
                     ? 'bg-primary/10 font-medium text-primary'
                     : 'text-gray-600 hover:bg-gray-50'
@@ -78,8 +85,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <div className="absolute bottom-0 left-0 right-0 border-t p-3">
           <button
+            type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 hover:bg-red-50"
+            className="flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-sm text-red-600 hover:bg-red-50"
           >
             <LogOut className="h-5 w-5" />
             {sidebarOpen && <span>خروج</span>}

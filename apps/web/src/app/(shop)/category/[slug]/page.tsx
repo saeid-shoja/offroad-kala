@@ -1,55 +1,49 @@
-'use client';
+import { CATEGORIES } from '@offroad/shared';
+import type { Metadata } from 'next';
+import { JsonLd } from '@/components/seo/json-ld';
+import { buildCategoryJsonLd, buildCategoryMetadata, buildMetadata } from '@/lib/seo';
+import { fetchCategoriesForSitemap } from '@/lib/server-api';
+import { CategoryPageClient } from './category-page-client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+type Props = { params: Promise<{ slug: string }> };
 
-import { api } from '@/lib/api';
-import { ProductCard } from '@/components/shop/product-card';
-import { useCategories } from '@/providers/categories-provider';
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const staticCategory = CATEGORIES.find((c) => c.slug === slug);
 
-export default function CategoryPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const { parts, loading: categoriesLoading } = useCategories();
-  const [products, setProducts] = useState<any[]>([]);
-  const [productsLoading, setProductsLoading] = useState(true);
-
-  const category = parts.find((c) => c.slug === slug);
-
-  useEffect(() => {
-    if (!category) {
-      setProductsLoading(false);
-      return;
-    }
-    setProductsLoading(true);
-    api.products
-      .list({ categoryId: category.id, limit: '50' })
-      .then((res) => setProducts(res.products))
-      .catch(() => setProducts([]))
-      .finally(() => setProductsLoading(false));
-  }, [category]);
-
-  if (categoriesLoading || productsLoading) {
-    return <div className="text-muted-foreground py-16 text-center">در حال بارگذاری...</div>;
+  if (staticCategory) {
+    return buildCategoryMetadata(staticCategory.name, slug);
   }
 
-  if (!category) {
-    return <div className="text-muted-foreground py-16 text-center">دسته‌بندی یافت نشد</div>;
+  const categoriesData = await fetchCategoriesForSitemap();
+  const apiCategory = categoriesData?.parts?.find((c) => c.slug === slug);
+
+  if (apiCategory) {
+    return buildCategoryMetadata(apiCategory.name, slug);
+  }
+
+  return buildMetadata({
+    title: 'دسته‌بندی',
+    description: 'مشاهده محصولات این دسته‌بندی در جیپو.',
+    path: `/category/${slug}`,
+  });
+}
+
+export default async function CategoryPage({ params }: Props) {
+  const { slug } = await params;
+  const staticCategory = CATEGORIES.find((c) => c.slug === slug);
+  let name = staticCategory?.name ?? slug;
+
+  if (!staticCategory) {
+    const categoriesData = await fetchCategoriesForSitemap();
+    const apiCategory = categoriesData?.parts?.find((c) => c.slug === slug);
+    if (apiCategory) name = apiCategory.name;
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{category.name}</h1>
-      {products.length > 0 ? (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      ) : (
-        <p className="text-muted-foreground py-16 text-center">
-          محصولی در این دسته‌بندی یافت نشد
-        </p>
-      )}
-    </div>
+    <>
+      <JsonLd data={buildCategoryJsonLd(name, slug)} />
+      <CategoryPageClient />
+    </>
   );
 }

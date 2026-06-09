@@ -1,29 +1,19 @@
 'use client';
 
+import { ChevronDown, MapPin, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { MapPin, ChevronDown, X } from 'lucide-react';
-
-import { IRAN_PROVINCES } from '@/lib/iran-locations';
-import { useLocationFilter } from '@/providers/location-provider';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+import { IRAN_PROVINCES } from '@/lib/iran-locations';
+import { useLocationFilter } from '@/stores/location-store';
 
 export function LocationPicker() {
-  const { selectedCities, toggleCity, clearCities, hasFilter } =
-    useLocationFilter();
+  const { selectedCities, toggleCity, clearCities, hasFilter } = useLocationFilter();
   const [open, setOpen] = useState(false);
   const [expandedProvince, setExpandedProvince] = useState<number | null>(null);
 
@@ -36,19 +26,17 @@ export function LocationPicker() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="max-w-[11rem] gap-1.5">
+        <div className="flex items-center max-w-44 h-10 rounded-md border-0 p-0 shadow-none cursor-pointer bg-card text-muted-foreground hover:text-primary data-[state=open]:text-primary gap-2 px-2 text-sm font-normal w-32">
           <MapPin className="h-4 w-4 shrink-0" />
           <span className="truncate">{label}</span>
           <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-60" />
-        </Button>
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div>
             <p className="text-sm font-semibold">موقعیت مکانی</p>
-            <p className="text-muted-foreground text-xs">
-              استان و شهر — چند شهر انتخاب کنید
-            </p>
+            <p className="text-muted-foreground text-xs">استان و شهر — چند شهر انتخاب کنید</p>
           </div>
           {hasFilter && (
             <Button variant="ghost" size="icon" onClick={clearCities} aria-label="پاک کردن">
@@ -79,14 +67,12 @@ export function LocationPicker() {
               <Collapsible
                 key={province.id}
                 open={expandedProvince === province.id}
-                onOpenChange={(isOpen) =>
-                  setExpandedProvince(isOpen ? province.id : null)
-                }
+                onOpenChange={(isOpen) => setExpandedProvince(isOpen ? province.id : null)}
               >
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="hover:bg-muted flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium"
+                    className="hover:bg-muted flex w-full items-center justify-between rounded-sm px-3 py-2 text-sm font-medium"
                   >
                     {province.name}
                     <ChevronDown
@@ -100,13 +86,18 @@ export function LocationPicker() {
                   {province.cities.map((city) => (
                     <label
                       key={`${province.id}-${city}`}
-                      className="hover:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-md px-3 py-1.5"
+                      className="hover:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-sm px-3 py-1.5"
+                      htmlFor={`${province.id}-${city}`}
                     >
                       <Checkbox
+                        id={`${province.id}-${city}`}
                         checked={selectedCities.includes(city)}
                         onCheckedChange={() => toggleCity(city)}
                       />
-                      <Label className="cursor-pointer text-sm font-normal">
+                      <Label
+                        htmlFor={`${province.id}-${city}`}
+                        className="cursor-pointer text-sm font-normal"
+                      >
                         {city}
                       </Label>
                     </label>
