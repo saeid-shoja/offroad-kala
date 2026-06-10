@@ -3,7 +3,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { createCorsOptions, getCorsOrigins } from './common/cors';
 import { validationExceptionFactory } from './common/validation';
+import { SWAGGER_PATH, setupSwagger } from './swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -14,10 +16,7 @@ async function bootstrap() {
   app.useBodyParser('json', { limit: '10mb' });
   app.useBodyParser('urlencoded', { extended: true, limit: '10mb' });
 
-  app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
-    credentials: true,
-  });
+  app.enableCors(createCorsOptions());
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -28,8 +27,12 @@ async function bootstrap() {
   );
 
   app.setGlobalPrefix('api');
+  setupSwagger(app);
 
-  await app.listen(process.env.PORT || 4000);
-  console.log(`API running on http://localhost:${process.env.PORT || 4000}`);
+  const port = process.env.PORT || 4000;
+  await app.listen(port);
+  console.log(`API running on http://localhost:${port}`);
+  console.log(`Swagger UI: http://localhost:${port}/api/${SWAGGER_PATH}`);
+  console.log(`CORS origins: ${getCorsOrigins().join(', ')}`);
 }
 bootstrap();

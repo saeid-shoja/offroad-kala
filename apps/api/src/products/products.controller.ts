@@ -1,8 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from '../auth/custom.decorator';
+import { SWAGGER_BEARER_KEY } from '../swagger';
 import { CreateProductDto, FindProductsQueryDto, UpdateProductDto } from './dto';
 import { ProductsService } from './products.service';
 
+@ApiTags('Products')
+@ApiBearerAuth(SWAGGER_BEARER_KEY)
 @Controller('products')
 export class ProductsController {
   constructor(private productsService: ProductsService) {}

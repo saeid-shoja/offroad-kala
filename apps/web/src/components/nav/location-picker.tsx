@@ -12,8 +12,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { IRAN_PROVINCES } from '@/lib/iran-locations';
 import { useLocationFilter } from '@/stores/location-store';
 
+function provinceSelectionState(provinceCities: string[], selectedCities: string[]) {
+  const selectedCount = provinceCities.filter((city) => selectedCities.includes(city)).length;
+  return {
+    allSelected: provinceCities.length > 0 && selectedCount === provinceCities.length,
+    someSelected: selectedCount > 0 && selectedCount < provinceCities.length,
+  };
+}
+
 export function LocationPicker() {
-  const { selectedCities, toggleCity, clearCities, hasFilter } = useLocationFilter();
+  const { selectedCities, toggleCity, toggleProvinceCities, clearCities, hasFilter } =
+    useLocationFilter();
   const [open, setOpen] = useState(false);
   const [expandedProvince, setExpandedProvince] = useState<number | null>(null);
 
@@ -63,48 +72,69 @@ export function LocationPicker() {
 
         <ScrollArea className="h-[min(24rem,60vh)]">
           <div className="space-y-1 p-2">
-            {IRAN_PROVINCES.map((province) => (
-              <Collapsible
-                key={province.id}
-                open={expandedProvince === province.id}
-                onOpenChange={(isOpen) => setExpandedProvince(isOpen ? province.id : null)}
-              >
-                <CollapsibleTrigger asChild>
-                  <button
-                    type="button"
-                    className="hover:bg-muted flex w-full items-center justify-between rounded-sm px-3 py-2 text-sm font-medium"
-                  >
-                    {province.name}
-                    <ChevronDown
-                      className={`h-4 w-4 opacity-60 transition-transform ${
-                        expandedProvince === province.id ? 'rotate-180' : ''
-                      }`}
-                    />
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-0.5 pb-2 pr-2 pl-1">
-                  {province.cities.map((city) => (
-                    <label
-                      key={`${province.id}-${city}`}
-                      className="hover:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-sm px-3 py-1.5"
-                      htmlFor={`${province.id}-${city}`}
+            {IRAN_PROVINCES.map((province) => {
+              const { allSelected, someSelected } = provinceSelectionState(
+                province.cities,
+                selectedCities,
+              );
+              const selectAllId = `${province.id}-all`;
+
+              return (
+                <Collapsible
+                  key={province.id}
+                  open={expandedProvince === province.id}
+                  onOpenChange={(isOpen) => setExpandedProvince(isOpen ? province.id : null)}
+                >
+                  <CollapsibleTrigger asChild>
+                    <button
+                      type="button"
+                      className="hover:bg-muted flex w-full items-center justify-between rounded-sm px-3 py-2 text-sm font-medium"
                     >
-                      <Checkbox
-                        id={`${province.id}-${city}`}
-                        checked={selectedCities.includes(city)}
-                        onCheckedChange={() => toggleCity(city)}
+                      <ChevronDown
+                        className={`h-4 w-4 opacity-60 transition-transform ${
+                          expandedProvince === province.id ? 'rotate-180' : ''
+                        }`}
                       />
-                      <Label
-                        htmlFor={`${province.id}-${city}`}
-                        className="cursor-pointer text-sm font-normal"
-                      >
-                        {city}
+                      {province.name}
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-0.5 pb-2 pr-2 pl-1">
+                    <label
+                      className="hover:bg-muted mb-1 flex cursor-pointer items-center justify-end gap-2 rounded-sm border-b px-3 py-1.5 font-medium"
+                      htmlFor={selectAllId}
+                    >
+                      <Label htmlFor={selectAllId} className="cursor-pointer text-sm font-medium">
+                        تمام شهرهای استان
                       </Label>
+                      <Checkbox
+                        id={selectAllId}
+                        checked={allSelected ? true : someSelected ? 'indeterminate' : false}
+                        onCheckedChange={() => toggleProvinceCities(province.cities)}
+                      />
                     </label>
-                  ))}
-                </CollapsibleContent>
-              </Collapsible>
-            ))}
+                    {province.cities.map((city) => (
+                      <label
+                        key={`${province.id}-${city}`}
+                        className="hover:bg-muted/60 flex cursor-pointer items-center justify-end gap-2 rounded-sm px-3 py-1.5"
+                        htmlFor={`${province.id}-${city}`}
+                      >
+                        <Label
+                          htmlFor={`${province.id}-${city}`}
+                          className="cursor-pointer text-sm font-normal"
+                        >
+                          {city}
+                        </Label>
+                        <Checkbox
+                          id={`${province.id}-${city}`}
+                          checked={selectedCities.includes(city)}
+                          onCheckedChange={() => toggleCity(city)}
+                        />
+                      </label>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
           </div>
         </ScrollArea>
 

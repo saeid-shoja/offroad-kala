@@ -1,9 +1,13 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Request } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { FavoritesService } from '../favorites/favorites.service';
 import { MessagesService } from '../messages/messages.service';
+import { SWAGGER_BEARER_KEY } from '../swagger';
 import { UpdateProfileDto } from './dto';
 import { UsersService } from './users.service';
 
+@ApiTags('Users')
+@ApiBearerAuth(SWAGGER_BEARER_KEY)
 @Controller('users')
 export class UsersController {
   constructor(
