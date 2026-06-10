@@ -1,5 +1,6 @@
 import { ABOUT_US_BLOCKS, SITE_NAME_FA, type SiteContentBlock } from '@offroad/shared';
 import type { Metadata } from 'next';
+import { SiteLogo } from '@/components/layout/site-logo';
 import { buildMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = buildMetadata({
@@ -28,6 +29,9 @@ export default function AboutUsPage() {
           </article>
         ))}
       </section>
+      <div className="w-full center">
+        <SiteLogo size="lg" imageClassName="w-full h-120 lg:min-w-md" />
+      </div>
     </div>
   );
 }

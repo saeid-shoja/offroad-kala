@@ -11,9 +11,9 @@
   --card-foreground: #1e3a5f;
   --popover: #ffffff;
   --popover-foreground: #1e3a5f;
-  --primary: #2563eb;
+  --primary: #d62828;
   --primary-foreground: #ffffff;
-  --secondary: #dbeafe;
+  --secondary: #fee1db;
   --secondary-foreground: #1e40af;
   --muted: #eff6ff;
   --muted-foreground: #475569;
@@ -42,7 +42,7 @@
   --card-foreground: #f8fafc;
   --popover: #1e293b;
   --popover-foreground: #f8fafc;
-  --primary: #3b82f6;
+  --primary: #d62828;
   --primary-foreground: #ffffff;
   --secondary: #334155;
   --secondary-foreground: #e2e8f0;
@@ -95,11 +95,15 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground overflow-x-hidden;
     direction: rtl;
   }
 
   .container {
     @apply mx-auto w-full max-w-7xl;
+  }
+
+  .center {
+    @apply flex justify-center items-center;
   }
 }

@@ -1,6 +1,7 @@
 import { SITE_EMAIL, SITE_NAME_FA } from '@offroad/shared';
-import { Mail, MapPin, Phone, ShoppingBag } from 'lucide-react';
+import { Mail, MapPin, Phone } from 'lucide-react';
 import Link from 'next/link';
+import { SiteLogo } from '@/components/layout/site-logo';
 import { Separator } from '@/components/ui/separator';
 
 const shopLinks = [
@@ -57,10 +58,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl px-4 py-10">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="text-primary flex items-center gap-2 text-lg font-bold">
-              <ShoppingBag className="h-5 w-5" />
-              {SITE_NAME_FA}
-            </Link>
+            <SiteLogo size="lg" />
             <p className="text-muted-foreground text-sm leading-relaxed">
               خرید و فروش لوازم آفرود، قطعات یدکی و تجهیزات آفرودی دست دوم و مزایده ای.
             </p>

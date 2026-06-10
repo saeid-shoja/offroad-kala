@@ -13,7 +13,7 @@ export const metadata: Metadata = buildMetadata({
 export default function HomePage() {
   return (
     <>
-      <div className="relative -mx-4 -mt-6 mb-6 w-[calc(100%+2rem)] max-w-none">
+      <div className="relative -mx-4 -mt-12 mb-4">
         <HeroSlider />
       </div>
       <MainSection />

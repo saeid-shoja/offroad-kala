@@ -26,11 +26,11 @@ export function LocationPicker() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="max-w-44 gap-1.5">
+        <div className="flex items-center max-w-44 h-10 rounded-md border-0 p-0 shadow-none cursor-pointer bg-card text-muted-foreground hover:text-primary data-[state=open]:text-primary gap-2 px-2 text-sm font-normal w-32">
           <MapPin className="h-4 w-4 shrink-0" />
           <span className="truncate">{label}</span>
           <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-60" />
-        </Button>
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between border-b px-4 py-3">

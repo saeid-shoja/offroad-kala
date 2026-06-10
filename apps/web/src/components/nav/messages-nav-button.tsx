@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Mail } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -25,14 +25,12 @@ export function MessagesNavButton() {
   if (!user) return null;
 
   return (
-    <Button variant="outline" asChild className="relative">
+    <Button variant="card" asChild className="relative h-10 w-10">
       <Link href="/dashboard?tab=messages" aria-label="پیام‌ها">
-        <Mail className="h-5 w-5" />
-        {unreadCount > 0 && (
-          <Badge className="absolute -top-2 -left-2 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px]">
-            {unreadCount > 99 ? '99+' : unreadCount.toLocaleString('fa-IR')}
-          </Badge>
-        )}
+        <Bell className="h-5 w-5" />
+        <Badge className="absolute -top-2 -left-2 flex h-3.5 w-3.5 items-center justify-center rounded-full px-1 text-[10px]">
+          {unreadCount > 99 ? '99+' : unreadCount.toLocaleString('fa-IR')}
+        </Badge>
       </Link>
     </Button>
   );
@@ -64,9 +62,7 @@ export function MessagesMobileLink({ onNavigate }: { onNavigate?: () => void }) 
         <Bell className="h-4 w-4" />
         پیام‌ها
       </span>
-      {unreadCount > 0 && (
-        <Badge variant="secondary">{unreadCount.toLocaleString('fa-IR')} جدید</Badge>
-      )}
+      <Badge variant="secondary">{unreadCount.toLocaleString('fa-IR')} جدید</Badge>
     </Link>
   );
 }

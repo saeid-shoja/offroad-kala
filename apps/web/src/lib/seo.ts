@@ -21,6 +21,7 @@ export function toAbsoluteUrl(path: string | undefined | null): string | undefin
   return path.startsWith('/') ? `${base}${path}` : `${base}/${path}`;
 }
 
+export const SITE_LOGO = '/logo.png';
 export const DEFAULT_OG_IMAGE = '/images/hero/s1.webp';
 
 type BuildMetadataOptions = {
@@ -169,7 +170,7 @@ export function buildOrganizationJsonLd() {
       url: siteUrl,
       email: SITE_EMAIL,
       description: SITE_DESCRIPTION,
-      logo: toAbsoluteUrl(DEFAULT_OG_IMAGE),
+      logo: toAbsoluteUrl(SITE_LOGO),
     },
     {
       '@context': 'https://schema.org',

@@ -8,12 +8,12 @@ import {
   Megaphone,
   Package,
   ShoppingCart,
-  Store,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { SiteLogo } from '@/components/layout/site-logo';
 
 const navItems = [
   { href: '/dashboard', label: 'داشبورد', icon: LayoutDashboard },
@@ -47,10 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }`}
       >
         <div className="flex items-center justify-between border-b p-4">
-          <Link href="/dashboard" className="flex items-center gap-2 font-bold text-primary">
-            <Store className="h-6 w-6" />
-            {sidebarOpen && <span>پنل مدیریت</span>}
-          </Link>
+          <SiteLogo href="/dashboard" size="sm" showName={sidebarOpen} nameClassName="text-sm" />
           <button
             type="button"
             onClick={() => setSidebarOpen(!sidebarOpen)}

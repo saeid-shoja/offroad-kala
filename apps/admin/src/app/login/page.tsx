@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { SiteLogo } from '@/components/layout/site-logo';
 import { PasswordInput } from '@/components/ui/password-input';
 import { adminApi } from '@/lib/api';
 
@@ -29,7 +30,10 @@ export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="w-full max-w-sm rounded-lg bg-white p-8 shadow-lg">
-        <h1 className="mb-6 text-center text-2xl font-bold">ورود مدیر</h1>
+        <div className="mb-6 flex flex-col items-center gap-3">
+          <SiteLogo href={null} size="md" priority />
+          <h1 className="text-center text-2xl font-bold">ورود مدیر</h1>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="admin-phone" className="mb-1 block text-sm">
