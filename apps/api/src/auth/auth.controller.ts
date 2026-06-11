@@ -1,8 +1,11 @@
 import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { SWAGGER_BEARER_KEY } from '../swagger';
 import { AuthService } from './auth.service';
 import { Public } from './custom.decorator';
 import { ForgotPasswordDto, LoginDto, RegisterDto } from './dto';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
@@ -25,6 +28,7 @@ export class AuthController {
     return this.authService.forgotPassword(body);
   }
 
+  @ApiBearerAuth(SWAGGER_BEARER_KEY)
   @Get('profile')
   getProfile(@Request() req: { user: { userId: string } }) {
     return this.authService.getProfile(req.user.userId);

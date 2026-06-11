@@ -1,7 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/custom.decorator';
 import { CreateMessageDto } from '../messages/dto';
 import { MessagesService } from '../messages/messages.service';
+import { SWAGGER_BEARER_KEY } from '../swagger';
 import { AdminService } from './admin.service';
 import {
   CreateAdminUserDto,
@@ -10,6 +12,8 @@ import {
   UpdateProductStatusDto,
 } from './dto';
 
+@ApiTags('Admin')
+@ApiBearerAuth(SWAGGER_BEARER_KEY)
 @Roles('ADMIN')
 @Controller('admin')
 export class AdminController {

@@ -174,11 +174,7 @@ export default function MainSection() {
           <div className="border-destructive/30 bg-destructive/5 flex flex-col items-center gap-3 rounded-lg border p-6 text-center">
             <AlertCircle className="text-destructive h-8 w-8" />
             <p className="text-destructive text-sm">{categoriesError}</p>
-            <p className="text-muted-foreground text-xs">
-              مطمئن شوید API روی{' '}
-              <code className="bg-muted rounded px-1">http://localhost:4000</code> در حال اجراست،
-              سپس دوباره تلاش کنید.
-            </p>
+            <p className="text-muted-foreground text-xs">ارتباط با سرور برقرار نشد</p>
             <Button variant="outline" size="sm" onClick={refetch}>
               تلاش مجدد
             </Button>

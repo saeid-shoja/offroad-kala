@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "nest build && nest start --watch",
-    "build": "nest build",
+    "dev": "prisma generate && nest build && nest start --watch",
+    "build": "prisma generate && nest build",
     "start": "nest start",
     "start:prod": "node dist/main",
     "lint": "biome check .",
@@ -15,8 +15,7 @@
     "db:seed": "prisma db seed",
     "db:reset-categories": "tsx prisma/reset-categories.ts",
     "db:migrate:reset": "prisma migrate reset",
-    "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.0",
@@ -24,6 +23,7 @@
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.0",
     "@nestjs/platform-express": "^11.1.0",
+    "@nestjs/swagger": "^11.4.4",
     "@offroad/shared": "workspace:*",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
